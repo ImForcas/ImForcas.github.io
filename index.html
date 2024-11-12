@@ -229,7 +229,7 @@ button:active {
     stroke-linecap: round;
     stroke-width: 4;
     fill: none;
-    animation: dance 1s infinite alternate ease-in-out;
+    animation: dance var(--dance-speed, 1s) infinite alternate ease-in-out;
     filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
 }
 
@@ -415,7 +415,6 @@ button:active {
 .loser-text {
     display: none;
     font-size: 120px;
-    color: #e74c3c;
     font-weight: bold;
     text-shadow: 0 0 20px rgba(231, 76, 60, 0.8);
     animation: pulse 0.5s infinite alternate;
@@ -456,7 +455,69 @@ button:active {
 @keyframes pulse {
     0% { transform: rotate(-45deg) scale(1); }
     50% { transform: rotate(-45deg) scale(1.2); }
-    100% { transform: rotate(-45deg) scale(1); }
+}
+
+.mute-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1001;
+}
+
+.mute-button:hover {
+    transform: scale(1.1);
+}
+
+.reviews-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 250px;
+    height: 150px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.reviews-scroll {
+    animation: scrollUp 20s linear infinite;
+}
+
+.review {
+    color: white;
+    margin-bottom: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+}
+
+.review-author {
+    color: #ffd700;
+    font-style: italic;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+@keyframes scrollUp {
+    0% {
+        transform: translateY(100%);
+    }
+    100% {
+        transform: translateY(-100%);
+    }
 }
 </style>
 </head>
@@ -503,6 +564,8 @@ button:active {
 </div>
 
 <audio id="victory-audio" src="Gimtadieno daina.mp3"></audio>
+<audio id="background-music" src="muzika.mp3" loop></audio>
+<button class="mute-button" id="mute-button">🔊</button>
 
 <button class="info-button" onclick="showInfo()">i</button>
 
@@ -524,6 +587,31 @@ button:active {
         <img src="RouletteWheel1.png" alt="Roulette wheel">
     </div>
     <div class="loser-text" id="loser-text">LOSER</div>
+</div>
+
+<div class="reviews-container">
+    <div class="reviews-scroll">
+        <div class="review">
+            "Geriausias žaidimas kurį esu matęs!"
+            <div class="review-author">- Jonukas iš Kauno</div>
+        </div>
+        <div class="review">
+            "Neįmanoma sustoti žaisti, priklausomybę sukelia!"
+            <div class="review-author">- Petras iš Vilniaus</div>
+        </div>
+        <div class="review">
+            "Labai linksmas žaidimas, rekomenduoju visiems!"
+            <div class="review-author">- Marytė iš Klaipėdos</div>
+        </div>
+        <div class="review">
+            "Praleidau visa vakara spėliodamas žodžius xDD"
+            <div class="review-author">- Tomas iš Šiaulių</div>
+        </div>
+        <div class="review">
+            "Pagaliau lietuviškas Wordle! Super!"
+            <div class="review-author">- Rūta iš Panevėžio</div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -591,6 +679,10 @@ function resetGame() {
     const audio = document.getElementById('victory-audio');
     audio.pause();
     audio.currentTime = 0;
+    document.querySelector('.reviews-container').style.display = 'block';
+
+    // Reset dance speed
+    document.documentElement.style.setProperty('--dance-speed', '1s');
 }
 
 function makeGuess() {
@@ -643,6 +735,10 @@ function makeGuess() {
         document.querySelectorAll('.fake-ad').forEach(ad => {
             ad.style.display = 'none';
         });
+        bgMusic.pause();
+        muteButton.textContent = '🔇';
+        isMuted = true;
+        document.querySelector('.reviews-container').style.display = 'none';
     } else {
         showEncouragement();
         if (currentRow === MAX_TRIES - 1) {
@@ -653,6 +749,12 @@ function makeGuess() {
     }
 
     currentRow++;
+
+    // After processing the guess, increase dance speed
+    const currentSpeed = parseFloat(document.documentElement.style.getPropertyValue('--dance-speed') || '1s');
+    const newSpeed = Math.max(0.3, currentSpeed - 0.1); // Don't go faster than 0.3s
+    document.documentElement.style.setProperty('--dance-speed', `${newSpeed}s`);
+
     input.value = '';
 
     if (currentRow > 0) {
@@ -741,19 +843,48 @@ function startGamble() {
     wheel.offsetHeight;
     
     const rotations = 5;
-    const finalAngle = 360 * rotations + 175;
+    // Determine if win (10% chance)
+    const isWinner = Math.random() < 0.1;
+    // Adjust final angle based on win/lose
+    const finalAngle = 360 * rotations + (isWinner ? 355 : 175);
     
     wheel.style.transform = `rotate(${finalAngle}deg)`;
     
     setTimeout(() => {
         loserText.style.display = 'block';
+        loserText.textContent = isWinner ? 'WINNER' : 'LOSER';
+        loserText.style.color = isWinner ? '#2ecc71' : '#e74c3c';
         
-        // Close wheel container after 5 seconds
         setTimeout(() => {
             wheelContainer.style.display = 'none';
         }, 5000);
     }, 3100);
 }
+
+// Audio control
+let hasInteracted = false;
+let isMuted = false;
+const bgMusic = document.getElementById('background-music');
+const muteButton = document.getElementById('mute-button');
+
+// Try to play music immediately
+bgMusic.play().catch(e => {
+    // If autoplay failed, wait for first interaction
+    document.addEventListener('click', () => {
+        bgMusic.play().catch(e => console.log('Audio play failed:', e));
+    }, { once: true });
+});
+
+muteButton.addEventListener('click', () => {
+    isMuted = !isMuted;
+    if (isMuted) {
+        bgMusic.pause();
+        muteButton.textContent = '🔇';
+    } else {
+        bgMusic.play().catch(e => console.log('Audio play failed:', e));
+        muteButton.textContent = '🔊';
+    }
+});
 
 // Add this line to the end of the existing script
 createGrid();
