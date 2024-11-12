@@ -161,16 +161,33 @@ button:active {
 .victory-image {
     width: 100vw;
     height: 100vh;
-    object-fit: cover;
-    animation: zoomIn 1s ease forwards;
+    object-fit: contain;
+    animation: zoomPulse 3s ease-in-out infinite;
 }
 
-@keyframes zoomIn {
-    from {
-        transform: scale(0);
-    }
+@keyframes zoomPulse {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(0.8); }
+}
+
+.winner-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 72px;
+    color: #2ecc71;
+    text-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+    z-index: 1001;
+    display: none;
+    font-weight: bold;
+    font-family: 'Impact', sans-serif;
+}
+
+@keyframes slideIn {
     to {
-        transform: scale(1);
+        right: 20px;
     }
 }
 
@@ -186,12 +203,6 @@ button:active {
     width: 250px;
     animation: slideIn 0.5s forwards;
     z-index: 999;
-}
-
-@keyframes slideIn {
-    to {
-        right: 20px;
-    }
 }
 
 .encouragement-popup.fade-out {
@@ -225,7 +236,7 @@ button:active {
 }
 
 .stickman {
-    stroke: #ffffff; /* Changed to white */
+    stroke: #ffffff;
     stroke-linecap: round;
     stroke-width: 4;
     fill: none;
@@ -363,7 +374,7 @@ button:active {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(2, 1fr);
-    opacity: 0.2; /* Make background subtle */
+    opacity: 0.2;
 }
 
 .bg-gif {
@@ -480,6 +491,29 @@ button:active {
     transform: scale(1.1);
 }
 
+.music-switch-button {
+    position: fixed;
+    bottom: 20px;
+    right: 80px; 
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1001;
+}
+
+.music-switch-button:hover {
+    transform: scale(1.1);
+}
+
 .reviews-container {
     position: fixed;
     bottom: 20px;
@@ -519,6 +553,66 @@ button:active {
         transform: translateY(-100%);
     }
 }
+
+.alphabet-container {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 15px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    z-index: 1000;
+}
+
+.alphabet-letter {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.2);
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.alphabet-letter.used {
+    text-decoration: line-through;
+    opacity: 0.5;
+    background: #787c7e;
+}
+
+.alphabet-letter.correct {
+    background: #6aaa64;
+    text-decoration: none;
+    opacity: 1;
+}
+
+.alphabet-letter.incorrect {
+    background: #e74c3c;
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.demotyvacija {
+    position: fixed;
+    right: -100%;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: right 1s ease-in-out;
+    z-index: 1010;
+}
+
+.demotyvacija.show {
+    right: 0;
+}
+
+.demotyvacija img {
+    max-height: 80vh;
+    width: auto;
+}
 </style>
 </head>
 <body>
@@ -548,6 +642,12 @@ button:active {
     <button id="gamble-btn" onclick="startGamble()">Gamble</button>
 </div>
 
+<div class="alphabet-container">
+    <div class="letter-grid">
+        <!-- Will be populated by JavaScript -->
+    </div>
+</div>
+
 <div class="stickman-container stickman-right">
     <svg class="stickman" viewBox="0 0 100 200">
         <circle cx="50" cy="30" r="20"/>
@@ -565,7 +665,12 @@ button:active {
 
 <audio id="victory-audio" src="Gimtadieno daina.mp3"></audio>
 <audio id="background-music" src="muzika.mp3" loop></audio>
+<audio id="song1" src="1.mp3" loop></audio>
+<audio id="song2" src="2.mp3" loop></audio>
+<audio id="song3" src="3.mp3" loop></audio>
+<audio id="song4" src="4.mp3" loop></audio>
 <button class="mute-button" id="mute-button">🔊</button>
+<button class="music-switch-button" id="music-switch-button">🎵</button>
 
 <button class="info-button" onclick="showInfo()">i</button>
 
@@ -615,7 +720,20 @@ button:active {
 </div>
 
 <script>
-const WORDS = ["BALLS", "BOOBS", "PENIS", "JONAS", "FARTS", "GOOFY", "SILLY", "BONER", "DOMAS", "LMFAO", "JOKER", "DUONA", "PENER", "LABAS", "FUNNY", "SILKE", "TICHE", "STINK", "BURGE", "PIZDA", "KURVA", "SYSIU", "LINUX", "ROKAS", "KAZYS", "MANGO", "AKMUO", "LOPAS", "ZAZAS", "DUPCE", "SUDAS", "KAKIS", "LOOOL", "SIGMA"];
+    const WORDS = ["BALLS", "BOOBS", "PENIS", "JONAS", "FARTS", "GOOFY", "SILLY", "BONER", "DOMAS", "LMFAO", "JOKER", "DUONA", "PENER", "LABAS", "FUNNY", "SILKE", "TICHE", "STINK", "BURGE", "PIZDA", "KURVA", "SYSIU", "LINUX", "ROKAS", "KAZYS", "MANGO", "AKMUO", "LOPAS", "ZAZAS", "DUPCE", "SUDAS", "KAKIS", "LOOOL", "SIGMA", "HOMER", "RASTA", "KLAVI", "VEJAI", "RINKA", "KELMA", "MELYS", "GIRIA", "RAMUS", "LAKAS", "PIKAS", "TILTA", "SVEIK", "GRAND", "MUZIK", "VARPA", "ZOLES", "MESKA", "BALSŲ", "SVENT", "KYSIS", "APPLE", "GHOST", "SMILE", "PLANE", "DRIVE", "MOUSE", "HOUSE", "FRESH", "CLOUD", "LIGHT", "CHESS", "PEARL", "BRAVE", "CABLE", "SUGAR", "HEART", "THINK", "QUIET", "PLANT", "SIGHT", "GOGLE", "KLIMA", "TEVAS", "LOPAS", "VEZIM", "VIRUS", "LAPAS", "SEJOS", "RATAS", "SAULE", "KIAUS", "TRASA", "VALKA", "RINKT", "TVORA", "SVETA", "NERIS", "DRAUG", "SKOLA", "GREIT", "SALDA", "TURIS", "LYDIS", "SALIS", "RAUDU", "NUOMA", "KAPAS", "RANKA", "TROBA", "METAI", "ZALIS", "SOUND", "BLACK", "PLACE", "SHAPE", "STORY", "WATER", "BRUSH", "TRUST", "WORMS", "PITCH", "SLEEP", "SPEED", "WORDS", "BRING", "EARTH", "SIGHT", "START", "THROW", "WHITE", "CRISP", "FLOCK", "GLASS", "GRASS", "GREAT", "FRUIT", "GUEST", "LEVEL", "NOISE", "OCEAN", "PEACE", "KASTI", "PILKA", "STIGA", "BUNDA", "VEJAS", "GREZE", "AKMEN", "KRANK", "LAPES", "KARTA", "TIKTI", "VIENA", "MATAS", "VAISI", "GENYS", "LAIME", "BANDA", "LYGUS", "SMUKA", "LIETI", "FIELD", "SHINE", "CLEAR", "GRACE", "SPARK", "SHOUT", "PRIDE", "BRAND", "STORM", "FRIEND", "SHORE", "BLEND", "MARCH", "HEAVY", "WORRY", "GLOBE", "TRAIN", "CLIMB", "NIGHT", "PRIZE"];
+const VICTORY_IMAGES = [
+    "Screenshot_2306.png",
+    "2dmfz0.jpg",
+    "20230315_212946.jpg", 
+    "abcs.png",
+    "coton.yeti-20082024-0002.jpg",
+    "GbXj-ZJXcAIewa9.png",
+    "IMG_20230315_204123.jpg",
+    "Screenshot_2024-03-30_121058.png",
+    "Snapchat-409393994.jpg",
+    "SPOIR_unknown.png",
+    "ugha.gif"
+];
 let WORD = WORDS[Math.floor(Math.random() * WORDS.length)];
 let currentRow = 0;
 const MAX_TRIES = 6;
@@ -628,6 +746,9 @@ const encouragements = [
     "Almost there!",
     "Don't give up!"
 ];
+
+let usedLetters = new Set();
+let correctLetters = new Set();
 
 function showEncouragement() {
     const popup = document.createElement('div');
@@ -665,12 +786,30 @@ function createGrid() {
     }, 3000);
 }
 
+function createAlphabet() {
+    const letterGrid = document.querySelector('.letter-grid');
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    
+    alphabet.split('').forEach(letter => {
+        const letterDiv = document.createElement('div');
+        letterDiv.className = 'alphabet-letter';
+        letterDiv.dataset.letter = letter;
+        letterDiv.textContent = letter;
+        letterGrid.appendChild(letterDiv);
+    });
+}
+
 function resetGame() {
     currentRow = 0;
     WORD = WORDS[Math.floor(Math.random() * WORDS.length)];
     const grid = document.getElementById('grid');
     grid.innerHTML = '';
     createGrid();
+    usedLetters = new Set();
+    correctLetters = new Set();
+    document.querySelectorAll('.alphabet-letter').forEach(letterDiv => {
+        letterDiv.classList.remove('used', 'correct', 'incorrect');
+    });
     document.getElementById('try-again-btn').style.display = 'none';
     document.getElementById('guess-input').value = '';
     document.getElementById('guess-input').disabled = false;
@@ -681,9 +820,62 @@ function resetGame() {
     audio.currentTime = 0;
     document.querySelector('.reviews-container').style.display = 'block';
 
+    // Remove winner elements if they exist
+    const winnerText = document.querySelector('.winner-text');
+    if (winnerText) winnerText.remove();
+    
+    const playAgainBtn = document.querySelector('button[style*="zIndex: 1001"]');
+    if (playAgainBtn) playAgainBtn.remove();
+
     // Reset dance speed
     document.documentElement.style.setProperty('--dance-speed', '1s');
 }
+
+function updateLetterStatuses(guess) {
+    guess.split('').forEach(letter => {
+        const letterDiv = document.querySelector(`.alphabet-letter[data-letter="${letter}"]`);
+        if (WORD.includes(letter)) {
+            letterDiv.classList.add('correct');
+            correctLetters.add(letter);
+        } else {
+            letterDiv.classList.add('incorrect');
+        }
+        usedLetters.add(letter);
+    });
+}
+
+let inactivityTimer;
+
+function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(showDemotyvacija, 30000);
+}
+
+function showDemotyvacija() {
+    const demotyvacija = document.createElement('div');
+    demotyvacija.className = 'demotyvacija';
+    demotyvacija.innerHTML = '<img src="demotyvacija.jpg" alt="Demotyvacija" width="400">';
+    document.body.appendChild(demotyvacija);
+    
+    setTimeout(() => {
+        demotyvacija.classList.add('show');
+        setTimeout(() => {
+            demotyvacija.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(demotyvacija);
+                resetInactivityTimer();
+            }, 1000);
+        }, 5000);
+    }, 100);
+}
+
+// Add event listeners
+document.getElementById('guess-input').addEventListener('input', resetInactivityTimer);
+document.addEventListener('keydown', resetInactivityTimer);
+document.addEventListener('click', resetInactivityTimer);
+
+// Start initial timer
+resetInactivityTimer();
 
 function makeGuess() {
     const input = document.getElementById('guess-input');
@@ -724,21 +916,60 @@ function makeGuess() {
         tiles[i].className = `tile ${tileStatuses[i]}`;
     }
 
+    updateLetterStatuses(guess);
+
     if (guess === WORD) {
         const overlay = document.getElementById('victory-overlay');
         overlay.style.display = 'flex';
+        
+        // Set random victory image
+        const randomImage = VICTORY_IMAGES[Math.floor(Math.random() * VICTORY_IMAGES.length)];
+        document.querySelector('.victory-image').src = randomImage;
+        
         const audio = document.getElementById('victory-audio');
         audio.play();
         audio.loop = true;
         document.querySelector('.info-button').style.display = 'none'; 
         
-        document.querySelectorAll('.fake-ad').forEach(ad => {
-            ad.style.display = 'none';
+        // Mute ALL songs on victory
+        songs.forEach(song => {
+            song.pause();
+            song.currentTime = 0;
         });
-        bgMusic.pause();
+        
         muteButton.textContent = '🔇';
         isMuted = true;
         document.querySelector('.reviews-container').style.display = 'none';
+
+        // Show WINNER text after 5 seconds
+        setTimeout(() => {
+            const winnerText = document.createElement('div');
+            winnerText.className = 'winner-text';
+            winnerText.textContent = 'WINNER';
+            document.body.appendChild(winnerText);
+            winnerText.style.display = 'block';
+            
+            // Show Play Again button after another 5 seconds
+            setTimeout(() => {
+                const playAgainBtn = document.createElement('button');
+                playAgainBtn.textContent = 'Play Again';
+                playAgainBtn.style.position = 'fixed';
+                playAgainBtn.style.top = '70%';
+                playAgainBtn.style.left = '50%';
+                playAgainBtn.style.transform = 'translate(-50%, -50%)';
+                playAgainBtn.style.zIndex = '1001';
+                playAgainBtn.style.padding = '15px 30px';
+                playAgainBtn.style.fontSize = '24px';
+                playAgainBtn.style.background = '#2ecc71';
+                playAgainBtn.style.cursor = 'pointer';
+                playAgainBtn.onclick = () => {
+                    document.body.removeChild(winnerText);
+                    document.body.removeChild(playAgainBtn);
+                    resetGame();
+                };
+                document.body.appendChild(playAgainBtn);
+            }, 5000);
+        }, 5000);
     } else {
         showEncouragement();
         if (currentRow === MAX_TRIES - 1) {
@@ -866,6 +1097,15 @@ let hasInteracted = false;
 let isMuted = false;
 const bgMusic = document.getElementById('background-music');
 const muteButton = document.getElementById('mute-button');
+const songs = [
+    document.getElementById('background-music'),
+    document.getElementById('song1'),
+    document.getElementById('song2'),
+    document.getElementById('song3'),
+    document.getElementById('song4')
+];
+
+let currentSongIndex = 0;
 
 // Try to play music immediately
 bgMusic.play().catch(e => {
@@ -878,16 +1118,36 @@ bgMusic.play().catch(e => {
 muteButton.addEventListener('click', () => {
     isMuted = !isMuted;
     if (isMuted) {
-        bgMusic.pause();
+        songs[currentSongIndex].pause();
         muteButton.textContent = '🔇';
     } else {
-        bgMusic.play().catch(e => console.log('Audio play failed:', e));
+        songs[currentSongIndex].play().catch(e => console.log('Audio play failed:', e));
         muteButton.textContent = '🔊';
+    }
+});
+
+document.getElementById('music-switch-button').addEventListener('click', () => {
+    // Stop current song
+    songs[currentSongIndex].pause();
+    songs[currentSongIndex].currentTime = 0;
+    
+    // Pick next song randomly
+    let nextIndex;
+    do {
+        nextIndex = Math.floor(Math.random() * songs.length);
+    } while (nextIndex === currentSongIndex);
+    
+    currentSongIndex = nextIndex;
+    
+    // Play new song if not muted
+    if (!isMuted) {
+        songs[currentSongIndex].play().catch(e => console.log('Audio play failed:', e));
     }
 });
 
 // Add this line to the end of the existing script
 createGrid();
+createAlphabet();
 createFakeAds();
 createWheel();
 </script>
