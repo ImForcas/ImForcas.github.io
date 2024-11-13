@@ -1,4 +1,5 @@
 <html><head><base href="/">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
 <style>
 body {
     background: linear-gradient(120deg, #2c3e50, #2c3e50);
@@ -282,6 +283,30 @@ button:active {
     z-index: 1001;
 }
 
+.restart-button {
+    position: fixed;
+    top: 80px;  
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e74c3c;  
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1001;
+}
+
+.restart-button:hover {
+    transform: scale(1.1);
+    background: #c0392b;
+}
+
 .modal {
     display: none;
     position: fixed;
@@ -438,10 +463,6 @@ button:active {
     to { transform: scale(1.1); }
 }
 
-#gamble-btn {
-    background: linear-gradient(45deg, #e74c3c, #c0392b);
-}
-
 .pointing-arrow {
     position: fixed;
     top: 70px;
@@ -555,63 +576,321 @@ button:active {
 }
 
 .alphabet-container {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;  
+    margin: 0 auto 20px auto;  
     padding: 15px;
     background: rgba(255,255,255,0.1);
-    border-radius: 10px;
-    z-index: 1000;
+    border-radius: 15px;
+    width: fit-content;
+}
+
+.letter-grid {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
 }
 
 .alphabet-letter {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
     background: rgba(255,255,255,0.2);
-    border-radius: 5px;
+    border-radius: 6px;
     color: white;
+    font-size: 20px;
     font-weight: bold;
+    cursor: pointer;
     transition: all 0.3s ease;
-}
-
-.alphabet-letter.used {
-    text-decoration: line-through;
-    opacity: 0.5;
-    background: #787c7e;
 }
 
 .alphabet-letter.correct {
     background: #6aaa64;
-    text-decoration: none;
-    opacity: 1;
+    color: white;
 }
 
 .alphabet-letter.incorrect {
-    background: #e74c3c;
+    background: #787c7e;
+    color: white;
     text-decoration: line-through;
-    opacity: 0.5;
 }
 
 .demotyvacija {
     position: fixed;
-    right: -100%;
     top: 50%;
+    right: -400px; /* Start offscreen */
     transform: translateY(-50%);
-    transition: right 1s ease-in-out;
-    z-index: 1010;
+    transition: all 1s ease-in-out;
+    z-index: 1000;
 }
 
 .demotyvacija.show {
-    right: 0;
+    right: 100px; /* Move to where right stickman is */
 }
 
 .demotyvacija img {
+    max-width: 400px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.scary-mode-switch {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1010;
+}
+
+.scary-text {
+  font-family: 'Creepster', cursive;
+  color: #ff0000;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  font-size: 24px;
+}
+
+.scary-switch {
+  width: 60px;
+  height: 30px;
+  border-radius: 15px;
+  background: #666;
+  position: relative;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.scary-switch.active {
+  background: #ff0000;
+}
+
+.scary-switch::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: 0.3s;
+}
+
+.scary-switch.active::after {
+  left: 32px;
+}
+
+@keyframes floatAround {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(100px, 50px); }
+  50% { transform: translate(50px, -50px); }
+  75% { transform: translate(-100px, 50px); }
+  100% { transform: translate(0, 0); }
+}
+
+.fake-ad.scary-mode {
+  animation: floatAround 10s infinite linear;
+}
+
+.copyright {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+  z-index: 1000;
+}
+
+.gamble-timer {
+    display: none;
+}
+
+.mines-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.95);
+    padding: 20px;
+    border-radius: 15px;
+    z-index: 1010;
+}
+
+.mines-title {
+    text-align: center;
+    font-size: 32px;
+    color: #ff0000;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255,0,0,0.5);
+}
+
+.mines-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.mine-cell {
+    width: 60px;
+    height: 60px;
+    background: #2c3e50;
+    border: 2px solid #34495e;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mine-cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
+}
+
+.mines-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.gamble-button {
+    position: fixed;
+    top: 80px;
+    left: 20px;
+    padding: 10px 20px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1010;
+    transition: all 0.3s;
+}
+
+.gamble-button:hover {
+    transform: scale(1.1);
+    background: #c0392b;
+}
+
+.phone-image {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 80%;
     max-height: 80vh;
-    width: auto;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1015;
+}
+
+.phone-image.show {
+    opacity: 1;
+}
+
+.fix-phone-button {
+    position: fixed;
+    top: 140px;
+    left: 20px;
+    padding: 10px 20px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1010;
+    transition: all 0.3s;
+}
+
+.fix-phone-button:hover {
+    transform: scale(1.1);
+    background: #2980b9;
+}
+
+.kill-people-button {
+    position: fixed;
+    top: 200px;
+    left: 20px;
+    padding: 10px 20px;
+    background: #c0392b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1010;
+    transition: all 0.3s;
+}
+
+.confirmation-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    z-index: 1020;
+    display: none;
+}
+
+.confirmation-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirmation-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.yes-button {
+    background: #c0392b;
+}
+
+.no-button {
+    background: #7f8c8d;
+}
+
+.raining-baba {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    animation: babaRain 3s linear;
+}
+
+@keyframes babaRain {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+    }
+    100% {
+        transform: translateY(100vh) rotate(360deg);
+    }
 }
 </style>
 </head>
@@ -636,16 +915,25 @@ button:active {
 <div class="game-container">
     <h1>Domo Palubinsko Wordle</h1>
     <div class="grid" id="grid"></div>
+    <div class="alphabet-container">
+        <div class="letter-grid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
     <input type="text" id="guess-input" maxlength="5" placeholder="Enter your guess">
     <button onclick="makeGuess()">Guess</button>
     <button id="try-again-btn" onclick="resetGame()">Try Again</button>
-    <button id="gamble-btn" onclick="startGamble()">Gamble</button>
-</div>
+    <button class="restart-button" onclick="resetGame()">🔄</button>
+    <button class="kill-people-button">🔪 Kill People</button>
 
-<div class="alphabet-container">
-    <div class="letter-grid">
-        <!-- Will be populated by JavaScript -->
+    <div class="confirmation-modal">
+        <p>Are you sure you want to do this? This cannot be undone</p>
+        <div class="confirmation-buttons">
+            <button class="yes-button">Yes</button>
+            <button class="no-button">No</button>
+        </div>
     </div>
+    <audio id="yaySound" src="Yay.mp3"></audio>
 </div>
 
 <div class="stickman-container stickman-right">
@@ -669,8 +957,22 @@ button:active {
 <audio id="song2" src="2.mp3" loop></audio>
 <audio id="song3" src="3.mp3" loop></audio>
 <audio id="song4" src="4.mp3" loop></audio>
+<audio id="vineBoom" src="VINE.mp3"></audio>
 <button class="mute-button" id="mute-button">🔊</button>
 <button class="music-switch-button" id="music-switch-button">🎵</button>
+
+<div class="scary-mode-switch">
+  <div class="scary-text">Scary Mode</div>
+  <div class="scary-switch"></div>
+</div>
+
+<img src="scary.jpg" alt="Scary face" class="scary-image" style="display:none;">
+
+<div class="copyright">
+  © 2024 UAB "Domas Palubinskas Casino" | <a href="https://ImForcas.github.io">ImForcas.github.io</a>
+</div>
+
+<span class="gamble-timer"></span>
 
 <button class="info-button" onclick="showInfo()">i</button>
 
@@ -685,13 +987,6 @@ button:active {
         - Gray: Letter is not in the word</p>
         <p>Note: Words can be in Lithuanian but will not contain Lithuanian letters (ą, ę, ė, į, š, ų, ū, č, ž).</p>
     </div>
-</div>
-
-<div class="wheel-container" id="wheel-container">
-    <div class="wheel" id="wheel">
-        <img src="RouletteWheel1.png" alt="Roulette wheel">
-    </div>
-    <div class="loser-text" id="loser-text">LOSER</div>
 </div>
 
 <div class="reviews-container">
@@ -720,7 +1015,17 @@ button:active {
 </div>
 
 <script>
-    const WORDS = ["BALLS", "BOOBS", "PENIS", "JONAS", "FARTS", "GOOFY", "SILLY", "BONER", "DOMAS", "LMFAO", "JOKER", "DUONA", "PENER", "LABAS", "FUNNY", "SILKE", "TICHE", "STINK", "BURGE", "PIZDA", "KURVA", "SYSIU", "LINUX", "ROKAS", "KAZYS", "MANGO", "AKMUO", "LOPAS", "ZAZAS", "DUPCE", "SUDAS", "KAKIS", "LOOOL", "SIGMA", "HOMER", "RASTA", "KLAVI", "VEJAI", "RINKA", "KELMA", "MELYS", "GIRIA", "RAMUS", "LAKAS", "PIKAS", "TILTA", "SVEIK", "GRAND", "MUZIK", "VARPA", "ZOLES", "MESKA", "BALSŲ", "SVENT", "KYSIS", "APPLE", "GHOST", "SMILE", "PLANE", "DRIVE", "MOUSE", "HOUSE", "FRESH", "CLOUD", "LIGHT", "CHESS", "PEARL", "BRAVE", "CABLE", "SUGAR", "HEART", "THINK", "QUIET", "PLANT", "SIGHT", "GOGLE", "KLIMA", "TEVAS", "LOPAS", "VEZIM", "VIRUS", "LAPAS", "SEJOS", "RATAS", "SAULE", "KIAUS", "TRASA", "VALKA", "RINKT", "TVORA", "SVETA", "NERIS", "DRAUG", "SKOLA", "GREIT", "SALDA", "TURIS", "LYDIS", "SALIS", "RAUDU", "NUOMA", "KAPAS", "RANKA", "TROBA", "METAI", "ZALIS", "SOUND", "BLACK", "PLACE", "SHAPE", "STORY", "WATER", "BRUSH", "TRUST", "WORMS", "PITCH", "SLEEP", "SPEED", "WORDS", "BRING", "EARTH", "SIGHT", "START", "THROW", "WHITE", "CRISP", "FLOCK", "GLASS", "GRASS", "GREAT", "FRUIT", "GUEST", "LEVEL", "NOISE", "OCEAN", "PEACE", "KASTI", "PILKA", "STIGA", "BUNDA", "VEJAS", "GREZE", "AKMEN", "KRANK", "LAPES", "KARTA", "TIKTI", "VIENA", "MATAS", "VAISI", "GENYS", "LAIME", "BANDA", "LYGUS", "SMUKA", "LIETI", "FIELD", "SHINE", "CLEAR", "GRACE", "SPARK", "SHOUT", "PRIDE", "BRAND", "STORM", "FRIEND", "SHORE", "BLEND", "MARCH", "HEAVY", "WORRY", "GLOBE", "TRAIN", "CLIMB", "NIGHT", "PRIZE"];
+let isMuted = false;  // Track mute state
+const muteButton = document.getElementById('mute-button'); // Added definition
+let songs = [
+    document.getElementById('background-music'),
+    document.getElementById('song1'),
+    document.getElementById('song2'), 
+    document.getElementById('song3'),
+    document.getElementById('song4')
+];
+
+const WORDS = ["BALLS", "BOOBS", "PENIS", "JONAS", "FARTS", "GOOFY", "SILLY", "BONER", "DOMAS", "LMFAO", "JOKER", "DUONA", "PENER", "LABAS", "FUNNY", "SILKE", "TICHE", "STINK", "BURGE", "PIZDA", "KURVA", "SYSIU", "LINUX", "ROKAS", "KAZYS", "MANGO", "AKMUO", "LOPAS", "ZAZAS", "DUPCE", "SUDAS", "KAKIS", "LOOOL", "SIGMA"];
 const VICTORY_IMAGES = [
     "Screenshot_2306.png",
     "2dmfz0.jpg",
@@ -737,6 +1042,52 @@ const VICTORY_IMAGES = [
 let WORD = WORDS[Math.floor(Math.random() * WORDS.length)];
 let currentRow = 0;
 const MAX_TRIES = 6;
+
+// Track currently playing background song
+let currentBackgroundSong = null;
+
+// Function to play random background song
+function playRandomBackgroundSong() {
+    const songs = [
+        document.getElementById('background-music'),
+        document.getElementById('song1'),
+        document.getElementById('song2'), 
+        document.getElementById('song3'),
+        document.getElementById('song4')
+    ];
+    
+    // Stop current song if playing
+    if (currentBackgroundSong) {
+        currentBackgroundSong.pause();
+        currentBackgroundSong.currentTime = 0;
+    }
+    
+    // Pick and play random song
+    currentBackgroundSong = songs[Math.floor(Math.random() * songs.length)];
+    if (!isMuted) {
+        currentBackgroundSong.play();
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    muteButton.textContent = isMuted ? '🔇' : '🔊';
+    
+    songs.forEach(song => {
+        song.muted = isMuted;
+    });
+    
+    // Also mute the vine boom sound
+    document.getElementById('vineBoom').muted = isMuted;
+}
+
+// Add event listener for mute button
+muteButton.addEventListener('click', toggleMute);
+
+// Modify the music switch button click handler
+document.getElementById('music-switch-button').addEventListener('click', () => {
+    playRandomBackgroundSong();
+});
 
 const encouragements = [
     "You're getting closer!",
@@ -788,14 +1139,28 @@ function createGrid() {
 
 function createAlphabet() {
     const letterGrid = document.querySelector('.letter-grid');
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    letterGrid.innerHTML = ''; // Clear existing content
     
-    alphabet.split('').forEach(letter => {
-        const letterDiv = document.createElement('div');
-        letterDiv.className = 'alphabet-letter';
-        letterDiv.dataset.letter = letter;
-        letterDiv.textContent = letter;
-        letterGrid.appendChild(letterDiv);
+    // Define keyboard layout rows
+    const keyboardRows = [
+        'QWERTYUIOP',
+        'ASDFGHJKL',
+        'ZXCVBNM'
+    ];
+    
+    keyboardRows.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'keyboard-row';
+        
+        row.split('').forEach(letter => {
+            const letterDiv = document.createElement('div');
+            letterDiv.className = 'alphabet-letter';
+            letterDiv.dataset.letter = letter;
+            letterDiv.textContent = letter;
+            rowDiv.appendChild(letterDiv);
+        });
+        
+        letterGrid.appendChild(rowDiv);
     });
 }
 
@@ -819,6 +1184,9 @@ function resetGame() {
     audio.pause();
     audio.currentTime = 0;
     document.querySelector('.reviews-container').style.display = 'block';
+    
+    // Make sure restart button stays visible
+    document.querySelector('.restart-button').style.display = 'flex';
 
     // Remove winner elements if they exist
     const winnerText = document.querySelector('.winner-text');
@@ -831,16 +1199,43 @@ function resetGame() {
     document.documentElement.style.setProperty('--dance-speed', '1s');
 }
 
+let isScaryMode = false;
+
+function toggleScaryMode() {
+  isScaryMode = !isScaryMode;
+  document.querySelector('.scary-switch').classList.toggle('active');
+  
+  // Update stickmen
+  document.querySelectorAll('.stickman').forEach(stickman => {
+    if (isScaryMode) {
+      stickman.style.backgroundImage = "url('scary.jpg')";
+      stickman.style.backgroundSize = 'contain';
+    } else {
+      stickman.style.backgroundImage = 'none';
+    }
+  });
+
+  // Update tiles
+  document.querySelectorAll('.tile:empty').forEach(tile => {
+    tile.style.backgroundImage = isScaryMode ? "url('scary.jpg')" : 'none';
+    tile.style.backgroundSize = 'cover';
+  });
+}
+
 function updateLetterStatuses(guess) {
-    guess.split('').forEach(letter => {
+    guess.split('').forEach((letter, index) => {
         const letterDiv = document.querySelector(`.alphabet-letter[data-letter="${letter}"]`);
-        if (WORD.includes(letter)) {
+        if (!letterDiv) return;
+        
+        if (WORD[index] === letter) {
+            letterDiv.classList.remove('incorrect');
             letterDiv.classList.add('correct');
-            correctLetters.add(letter);
+        } else if (WORD.includes(letter)) {
+            letterDiv.classList.remove('incorrect');
+            letterDiv.classList.add('correct');
         } else {
             letterDiv.classList.add('incorrect');
         }
-        usedLetters.add(letter);
     });
 }
 
@@ -873,9 +1268,21 @@ function showDemotyvacija() {
 document.getElementById('guess-input').addEventListener('input', resetInactivityTimer);
 document.addEventListener('keydown', resetInactivityTimer);
 document.addEventListener('click', resetInactivityTimer);
+document.querySelector('.scary-switch').addEventListener('click', toggleScaryMode);
 
-// Start initial timer
-resetInactivityTimer();
+// Start first interaction setup
+function setupFirstInteraction() {
+    const firstInteractionHandler = () => {
+        playRandomBackgroundSong();
+        document.removeEventListener('click', firstInteractionHandler);
+        document.removeEventListener('keydown', firstInteractionHandler);
+    };
+
+    document.addEventListener('click', firstInteractionHandler);
+    document.addEventListener('keydown', firstInteractionHandler);
+}
+
+document.addEventListener('DOMContentLoaded', setupFirstInteraction);
 
 function makeGuess() {
     const input = document.getElementById('guess-input');
@@ -937,7 +1344,7 @@ function makeGuess() {
             song.currentTime = 0;
         });
         
-        muteButton.textContent = '🔇';
+        muteButton.textContent = '🔇';  // Changed to use muteButton variable
         isMuted = true;
         document.querySelector('.reviews-container').style.display = 'none';
 
@@ -1042,6 +1449,10 @@ function showNextAd() {
             <img src="${adData.img}" alt="Advertisement" width="200" height="150">
         `;
         
+        if (isScaryMode) {
+            ad.classList.add('scary-mode');
+        }
+        
         document.body.appendChild(ad);
         
         ad.querySelector('.fake-ad-close').onclick = () => {
@@ -1050,105 +1461,266 @@ function showNextAd() {
     }
 }
 
-function createWheel() {
-    const wheel = document.getElementById('wheel');
-    wheel.innerHTML = `<img src="RouletteWheel1.png" alt="Roulette wheel">`;
+// Gamble game functions
+function createMinesGame() {
+    const container = document.createElement('div');
+    container.className = 'mines-container';
+    
+    const title = document.createElement('div');
+    title.className = 'mines-title';
+    title.textContent = '💣MINES💣';
+    
+    const closeBtn = document.createElement('div');
+    closeBtn.className = 'mines-close';
+    closeBtn.textContent = '×';
+    closeBtn.onclick = () => container.style.display = 'none';
+    
+    const grid = document.createElement('div');
+    grid.className = 'mines-grid';
+    
+    for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'mine-cell';
+        cell.onclick = function() {
+            if (!this.textContent) {
+                this.textContent = '💣';
+                vineBoom.currentTime = 0;
+                vineBoom.play();
+                // Reveal all other cells with money
+                document.querySelectorAll('.mine-cell').forEach(c => {
+                    if (c !== this && !c.textContent) {
+                        c.textContent = '💵';
+                    }
+                });
+                // Disable all cells
+                document.querySelectorAll('.mine-cell').forEach(c => {
+                    c.style.cursor = 'default';
+                    c.onclick = null;
+                });
+            }
+        };
+        grid.appendChild(cell);
+    }
+    
+    container.appendChild(title);
+    container.appendChild(closeBtn);
+    container.appendChild(grid);
+    document.body.appendChild(container);
+    
+    // Add gamble button
+    const gambleBtn = document.createElement('button');
+    gambleBtn.className = 'gamble-button';
+    gambleBtn.textContent = '🎰 Gamble';
+    gambleBtn.onclick = () => {
+        container.style.display = 'block';
+        // Reset grid
+        document.querySelectorAll('.mine-cell').forEach(cell => {
+            cell.textContent = '';
+            cell.style.cursor = 'pointer';
+            cell.onclick = function() {
+                if (!this.textContent) {
+                    this.textContent = '💣';
+                    vineBoom.currentTime = 0;
+                    vineBoom.play();
+                    document.querySelectorAll('.mine-cell').forEach(c => {
+                        if (c !== this && !c.textContent) {
+                            c.textContent = '💵';
+                        }
+                    });
+                    document.querySelectorAll('.mine-cell').forEach(c => {
+                        c.style.cursor = 'default';
+                        c.onclick = null;
+                    });
+                }
+            };
+        });
+    };
+    document.body.appendChild(gambleBtn);
 }
 
-function startGamble() {
-    const wheelContainer = document.getElementById('wheel-container');
-    const wheel = document.getElementById('wheel');
-    const loserText = document.getElementById('loser-text');
-    const gambleBtn = document.getElementById('gamble-btn');
+// Added phone button functionality
+function showFixedPhone() {
+    const phoneImg = document.createElement('img');
+    phoneImg.src = 'phone.png';
+    phoneImg.alt = 'Fixed phone';
+    phoneImg.className = 'phone-image';
+    document.body.appendChild(phoneImg);
     
-    wheelContainer.style.display = 'flex';
-    loserText.style.display = 'none';
-    wheel.style.transform = 'rotate(0deg)';
+    // Force reflow
+    phoneImg.offsetHeight;
     
-    // Disable gamble button
-    gambleBtn.disabled = true;
-    gambleBtn.style.opacity = '0.5';
-    gambleBtn.style.cursor = 'not-allowed';
+    // Show image
+    requestAnimationFrame(() => {
+        phoneImg.classList.add('show');
+    });
     
-    // Force browser reflow
-    wheel.offsetHeight;
-    
-    const rotations = 5;
-    // Determine if win (10% chance)
-    const isWinner = Math.random() < 0.1;
-    // Adjust final angle based on win/lose
-    const finalAngle = 360 * rotations + (isWinner ? 355 : 175);
-    
-    wheel.style.transform = `rotate(${finalAngle}deg)`;
-    
+    // Remove after 5 seconds
     setTimeout(() => {
-        loserText.style.display = 'block';
-        loserText.textContent = isWinner ? 'WINNER' : 'LOSER';
-        loserText.style.color = isWinner ? '#2ecc71' : '#e74c3c';
-        
+        phoneImg.classList.remove('show');
         setTimeout(() => {
-            wheelContainer.style.display = 'none';
-        }, 5000);
-    }, 3100);
+            document.body.removeChild(phoneImg);
+        }, 500);
+    }, 5000);
 }
 
-// Audio control
-let hasInteracted = false;
-let isMuted = false;
-const bgMusic = document.getElementById('background-music');
-const muteButton = document.getElementById('mute-button');
-const songs = [
-    document.getElementById('background-music'),
-    document.getElementById('song1'),
-    document.getElementById('song2'),
-    document.getElementById('song3'),
-    document.getElementById('song4')
-];
+// Add the button creation for fixing phone
+const fixPhoneBtn = document.createElement('button');
+fixPhoneBtn.className = 'fix-phone-button';
+fixPhoneBtn.textContent = '🔧 Fix Phone';
+fixPhoneBtn.onclick = showFixedPhone;
+document.body.appendChild(fixPhoneBtn);
 
-let currentSongIndex = 0;
+// Initialize Kill People button
+function initKillPeopleButton() {
+    const killBtn = document.querySelector('.kill-people-button');
+    const modal = document.querySelector('.confirmation-modal');
+    const yesBtn = document.querySelector('.yes-button');
+    const noBtn = document.querySelector('.no-button');
 
-// Try to play music immediately
-bgMusic.play().catch(e => {
-    // If autoplay failed, wait for first interaction
-    document.addEventListener('click', () => {
-        bgMusic.play().catch(e => console.log('Audio play failed:', e));
-    }, { once: true });
-});
+    killBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+    });
 
-muteButton.addEventListener('click', () => {
-    isMuted = !isMuted;
-    if (isMuted) {
-        songs[currentSongIndex].pause();
-        muteButton.textContent = '🔇';
-    } else {
-        songs[currentSongIndex].play().catch(e => console.log('Audio play failed:', e));
-        muteButton.textContent = '🔊';
-    }
-});
+    noBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
 
-document.getElementById('music-switch-button').addEventListener('click', () => {
-    // Stop current song
-    songs[currentSongIndex].pause();
-    songs[currentSongIndex].currentTime = 0;
-    
-    // Pick next song randomly
-    let nextIndex;
-    do {
-        nextIndex = Math.floor(Math.random() * songs.length);
-    } while (nextIndex === currentSongIndex);
-    
-    currentSongIndex = nextIndex;
-    
-    // Play new song if not muted
-    if (!isMuted) {
-        songs[currentSongIndex].play().catch(e => console.log('Audio play failed:', e));
-    }
-});
+    yesBtn.addEventListener('click', () => {
+        // Function to play yay sound with a new audio instance each time
+        const playYay = () => {
+            const yay = new Audio('Yay.mp3');
+            yay.play();
+        };
 
-// Add this line to the end of the existing script
+        // Replace all images, backgrounds, and UI elements with baba.png
+        const replaceElements = () => {
+            let delay = 0;
+            const increment = 500; // Time between each replacement
+
+            // Replace background images
+            document.querySelectorAll('.bg-gif').forEach(gif => {
+                setTimeout(() => {
+                    gif.src = 'baba.png';
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace victory image
+            setTimeout(() => {
+                document.querySelector('.victory-image').src = 'baba.png';
+                playYay();
+            }, delay);
+            delay += increment;
+
+            // Replace all images
+            document.querySelectorAll('img').forEach(img => {
+                setTimeout(() => {
+                    img.src = 'baba.png';
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace buttons with images
+            document.querySelectorAll('button').forEach(button => {
+                setTimeout(() => {
+                    button.innerHTML = `<img src="baba.png" alt="baba" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    button.style.padding = '0';
+                    button.style.overflow = 'hidden';
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace tiles
+            document.querySelectorAll('.tile').forEach(tile => {
+                setTimeout(() => {
+                    tile.innerHTML = `<img src="baba.png" alt="baba" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace alphabet letters
+            document.querySelectorAll('.alphabet-letter').forEach(letter => {
+                setTimeout(() => {
+                    letter.innerHTML = `<img src="baba.png" alt="baba" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace fake ads
+            document.querySelectorAll('.fake-ad img').forEach(ad => {
+                setTimeout(() => {
+                    ad.src = 'baba.png';
+                    playYay();
+                }, delay);
+                delay += increment;
+            });
+
+            // Replace background pattern
+            setTimeout(() => {
+                document.body.style.backgroundImage = "url('baba.png')";
+                document.body.style.backgroundSize = 'cover';
+                playYay();
+            }, delay);
+
+            // Replace any remaining text elements with the image
+            const textElements = document.querySelectorAll('h1, p, span, div:not(.game-container):not(.grid)');
+            textElements.forEach(elem => {
+                if (elem.children.length === 0 && elem.textContent.trim()) {
+                    setTimeout(() => {
+                        const originalHeight = elem.offsetHeight;
+                        elem.innerHTML = `<img src="baba.png" alt="baba" style="height: ${originalHeight}px; width: auto;">`;
+                        playYay();
+                    }, delay);
+                    delay += increment;
+                }
+            });
+        };
+
+        replaceElements();
+
+        // Create raining babas
+        const createRainingBabas = () => {
+            const spawnBaba = () => {
+                const baba = document.createElement('img');
+                baba.src = 'baba.png';
+                baba.className = 'raining-baba';
+                baba.style.left = Math.random() * window.innerWidth + 'px';
+                baba.style.width = Math.random() * 30 + 20 + 'px'; // Random size between 20-50px
+                baba.style.opacity = Math.random() * 0.5 + 0.5; // Random opacity
+                document.body.appendChild(baba);
+
+                // Remove the element after animation completes
+                baba.addEventListener('animationend', () => {
+                    document.body.removeChild(baba);
+                });
+            };
+
+            // Spawn 100 babas over 10 seconds
+            let count = 0;
+            const interval = setInterval(() => {
+                spawnBaba();
+                count++;
+                if (count >= 100) {
+                    clearInterval(interval);
+                }
+            }, 100);
+        };
+
+        createRainingBabas();
+        modal.style.display = 'none';
+    });
+}
+
+// Call this at the end of the existing script
+initKillPeopleButton();
 createGrid();
 createAlphabet();
 createFakeAds();
-createWheel();
+createMinesGame();
 </script>
 </body></html>
