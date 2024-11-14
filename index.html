@@ -535,6 +535,29 @@ button:active {
     transform: scale(1.1);
 }
 
+.custom-song-button {
+    position: fixed;
+    bottom: 20px;
+    right: 140px; 
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-size: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1001;
+}
+
+.custom-song-button:hover {
+    transform: scale(1.1);
+}
+
 .reviews-container {
     position: fixed;
     bottom: 20px;
@@ -689,16 +712,54 @@ button:active {
   left: 32px;
 }
 
-@keyframes floatAround {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(100px, 50px); }
-  50% { transform: translate(50px, -50px); }
-  75% { transform: translate(-100px, 50px); }
-  100% { transform: translate(0, 0); }
+.emoji-mode-switch {
+  position: fixed;
+  top: 20px;
+  left: 200px; /* Position it after scary mode switch */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1010;
 }
 
-.fake-ad.scary-mode {
-  animation: floatAround 10s infinite linear;
+.emoji-text {
+  font-family: 'Comic Sans MS', cursive;
+  font-weight: bold;
+  font-size: 28px;
+  background: linear-gradient(45deg, #ff0099, #00ff99);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.emoji-switch {
+  width: 60px;
+  height: 30px;
+  border-radius: 15px;
+  background: #666;
+  position: relative;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.emoji-switch.active {
+  background: #2ecc71;
+}
+
+.emoji-switch::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: white;
+  top: 2px;
+  left: 2px;
+  transition: 0.3s;
+}
+
+.emoji-switch.active::after {
+  left: 32px;
 }
 
 .copyright {
@@ -828,8 +889,9 @@ button:active {
 
 .kill-people-button {
     position: fixed;
-    top: 200px;
-    left: 20px;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     padding: 10px 20px;
     background: #c0392b;
     color: white;
@@ -839,6 +901,11 @@ button:active {
     font-size: 18px;
     z-index: 1010;
     transition: all 0.3s;
+}
+
+.kill-people-button:hover {
+    transform: translateX(-50%) scale(1.1);
+    background: #a93226;
 }
 
 .confirmation-modal {
@@ -892,6 +959,151 @@ button:active {
         transform: translateY(100vh) rotate(360deg);
     }
 }
+
+.smiche {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    animation: drop 1s ease-in, bounce 1s infinite ease-in-out;
+    animation-delay: 0s, 1s;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+@keyframes drop {
+    0% {
+        top: -100px;
+    }
+    100% {
+        top: calc(100vh - 100px);
+    }
+}
+
+@keyframes bounce {
+    0%, 100% {
+        top: calc(100vh - 100px);
+        animation-timing-function: ease-out;
+    }
+    50% {
+        top: calc(100vh - 200px);
+        animation-timing-function: ease-in;
+    }
+}
+
+.bleeding {
+    animation: bleed 1s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes bleed {
+    0% {
+        box-shadow: 0 0 0 0px rgba(255,0,0,0.8);
+        opacity: 1;
+    }
+    100% {
+        box-shadow: 0 0 0 20px rgba(255,0,0,0);
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}
+
+.crosshair-cursor {
+    cursor: crosshair !important;
+}
+
+.horse-button {
+    position: fixed;
+    top: 320px;  /* Below the shoot button */
+    left: 20px;
+    padding: 10px 20px;
+    background: #8e44ad;  /* Purple color */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 1010;
+    transition: all 0.3s;
+}
+
+.horse-button:hover {
+    transform: scale(1.1);
+    background: #6c3483;
+}
+
+.horse {
+    position: fixed;
+    width: 100px;
+    height: 100px;
+    pointer-events: none;
+    z-index: 1000;
+    transition: all 1s ease-in-out;
+}
+
+@keyframes horseMitosis {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.5) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+/* Update death mode switch positioning */
+.death-mode-switch {
+    position: fixed;
+    top: 20px;
+    left: 600px; /* Increased from 400px to 600px to move further right */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1010;
+}
+
+.death-text {
+    font-family: 'Creepster', cursive;
+    font-size: 32px;
+    color: #ff0000;
+    text-shadow: 
+        0 0 10px #ff0000,
+        0 0 20px #ff0000,
+        0 0 30px #ff0000;
+    animation: pulse 1s infinite;
+}
+
+.death-switch {
+    width: 60px;
+    height: 30px;
+    border-radius: 15px;
+    background: #666;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.death-switch.active {
+    background: #ff0000;
+    box-shadow: 0 0 20px #ff0000;
+}
+
+.death-switch::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: 0.3s;
+}
+
+.death-switch.active::after {
+    left: 32px;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
 </style>
 </head>
 <body>
@@ -925,7 +1137,9 @@ button:active {
     <button id="try-again-btn" onclick="resetGame()">Try Again</button>
     <button class="restart-button" onclick="resetGame()">🔄</button>
     <button class="kill-people-button">🔪 Kill People</button>
-
+    <input type="file" id="custom-song-input" accept="audio/mp3" style="display: none;">
+    <button class="custom-song-button" id="custom-song-button">📎</button>
+    
     <div class="confirmation-modal">
         <p>Are you sure you want to do this? This cannot be undone</p>
         <div class="confirmation-buttons">
@@ -964,6 +1178,17 @@ button:active {
 <div class="scary-mode-switch">
   <div class="scary-text">Scary Mode</div>
   <div class="scary-switch"></div>
+</div>
+
+<div class="emoji-mode-switch">
+  <div class="emoji-text">Emoji Mode 🎭</div>
+  <div class="emoji-switch"></div>
+</div>
+
+<!-- Add this after the emoji mode switch -->
+<div class="death-mode-switch">
+    <div class="death-text">YOU WILL DIE</div>
+    <div class="death-switch"></div>
 </div>
 
 <img src="scary.jpg" alt="Scary face" class="scary-image" style="display:none;">
@@ -1025,6 +1250,8 @@ let songs = [
     document.getElementById('song4')
 ];
 
+let customSong = null;
+
 const WORDS = ["BALLS", "BOOBS", "PENIS", "JONAS", "FARTS", "GOOFY", "SILLY", "BONER", "DOMAS", "LMFAO", "JOKER", "DUONA", "PENER", "LABAS", "FUNNY", "SILKE", "TICHE", "STINK", "BURGE", "PIZDA", "KURVA", "SYSIU", "LINUX", "ROKAS", "KAZYS", "MANGO", "AKMUO", "LOPAS", "ZAZAS", "DUPCE", "SUDAS", "KAKIS", "LOOOL", "SIGMA"];
 const VICTORY_IMAGES = [
     "Screenshot_2306.png",
@@ -1048,13 +1275,10 @@ let currentBackgroundSong = null;
 
 // Function to play random background song
 function playRandomBackgroundSong() {
-    const songs = [
-        document.getElementById('background-music'),
-        document.getElementById('song1'),
-        document.getElementById('song2'), 
-        document.getElementById('song3'),
-        document.getElementById('song4')
-    ];
+    const availableSongs = [...songs];
+    if (customSong) {
+        availableSongs.push(customSong);
+    }
     
     // Stop current song if playing
     if (currentBackgroundSong) {
@@ -1063,7 +1287,7 @@ function playRandomBackgroundSong() {
     }
     
     // Pick and play random song
-    currentBackgroundSong = songs[Math.floor(Math.random() * songs.length)];
+    currentBackgroundSong = availableSongs[Math.floor(Math.random() * availableSongs.length)];
     if (!isMuted) {
         currentBackgroundSong.play();
     }
@@ -1077,6 +1301,10 @@ function toggleMute() {
         song.muted = isMuted;
     });
     
+    if (customSong) {
+        customSong.muted = isMuted;
+    }
+    
     // Also mute the vine boom sound
     document.getElementById('vineBoom').muted = isMuted;
 }
@@ -1088,6 +1316,43 @@ muteButton.addEventListener('click', toggleMute);
 document.getElementById('music-switch-button').addEventListener('click', () => {
     playRandomBackgroundSong();
 });
+
+// Add the setupCustomSongUpload function
+function setupCustomSongUpload() {
+    const customSongButton = document.getElementById('custom-song-button');
+    const customSongInput = document.getElementById('custom-song-input');
+
+    customSongButton.addEventListener('click', () => {
+        customSongInput.click();
+    });
+
+    customSongInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            if (customSong) {
+                customSong.pause();
+                URL.revokeObjectURL(customSong.src);
+            }
+            customSong = new Audio(url);
+            customSong.loop = true;
+            customSong.muted = isMuted;
+            
+            // Play the custom song immediately
+            if (currentBackgroundSong) {
+                currentBackgroundSong.pause();
+                currentBackgroundSong.currentTime = 0;
+            }
+            currentBackgroundSong = customSong;
+            if (!isMuted) {
+                currentBackgroundSong.play();
+            }
+        }
+    });
+}
+
+// Add this line to the end of the script
+setupCustomSongUpload();
 
 const encouragements = [
     "You're getting closer!",
@@ -1222,6 +1487,81 @@ function toggleScaryMode() {
   });
 }
 
+const emojis = [
+  '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', 
+  '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎',
+  '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩',
+  '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰'
+];
+
+let emojiMode = false;
+const originalTexts = new Map();
+
+function getRandomEmoji() {
+  return emojis[Math.floor(Math.random() * emojis.length)];
+}
+
+function toggleEmojiMode() {
+  emojiMode = !emojiMode;
+  document.querySelector('.emoji-switch').classList.toggle('active');
+  
+  // Get all text nodes
+  const walker = document.createTreeWalker(
+    document.body,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: function(node) {
+        // Skip scripts and styles
+        if (node.parentElement?.tagName === 'SCRIPT' || 
+            node.parentElement?.tagName === 'STYLE') {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }
+  );
+
+  const textNodes = [];
+  let node;
+  while (node = walker.nextNode()) {
+    textNodes.push(node);
+  }
+
+  textNodes.forEach(node => {
+    if (emojiMode) {
+      // Store original text if not already stored
+      if (!originalTexts.has(node)) {
+        originalTexts.set(node, node.textContent);
+      }
+      // Replace each character with random emoji
+      node.textContent = Array.from(node.textContent)
+        .map(char => char.trim() ? getRandomEmoji() : char)
+        .join('');
+    } else {
+      // Restore original text
+      if (originalTexts.has(node)) {
+        node.textContent = originalTexts.get(node);
+      }
+    }
+  });
+}
+
+// Add event listener for emoji switch
+document.querySelector('.emoji-switch').addEventListener('click', toggleEmojiMode);
+
+// Modify text update functions to handle emoji mode
+const originalUpdateLetterStatuses = updateLetterStatuses;
+updateLetterStatuses = function(guess) {
+  originalUpdateLetterStatuses(guess);
+  if (emojiMode) {
+    document.querySelectorAll('.alphabet-letter').forEach(letter => {
+      if (letter.textContent.length === 1) { // Only replace single characters
+        letter.textContent = getRandomEmoji();
+      }
+    });
+  }
+};
+
 function updateLetterStatuses(guess) {
     guess.split('').forEach((letter, index) => {
         const letterDiv = document.querySelector(`.alphabet-letter[data-letter="${letter}"]`);
@@ -1283,6 +1623,44 @@ function setupFirstInteraction() {
 }
 
 document.addEventListener('DOMContentLoaded', setupFirstInteraction);
+
+// Add this to the JavaScript section
+let deathMode = false;
+let colorInterval;
+
+function getRandomColor() {
+    return '#' + Math.floor(Math.random()*16777215).toString(16);
+}
+
+function toggleDeathMode() {
+    deathMode = !deathMode;
+    document.querySelector('.death-switch').classList.toggle('active');
+    
+    if (deathMode) {
+        // Start color changing interval when mode is turned on
+        colorInterval = setInterval(() => {
+            // Change colors of all major elements
+            document.querySelectorAll('img, button, .tile, .alphabet-letter, .game-container, .modal-content, .fake-ad, h1, p, div').forEach(element => {
+                element.style.transition = 'none'; // Disable transitions for smoother color changes
+                
+                // Randomize different color properties
+                element.style.backgroundColor = getRandomColor();
+                element.style.color = getRandomColor();
+                element.style.borderColor = getRandomColor();
+                
+                if (element.style.backgroundImage) {
+                    element.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+                }
+            });
+        }, 100);
+    } else {
+        // Just stop the interval when turned off, preserving current colors
+        clearInterval(colorInterval);
+    }
+}
+
+// Add event listener for death switch
+document.querySelector('.death-switch').addEventListener('click', toggleDeathMode);
 
 function makeGuess() {
     const input = document.getElementById('guess-input');
@@ -1722,5 +2100,160 @@ createGrid();
 createAlphabet();
 createFakeAds();
 createMinesGame();
+
+const smicheBtn = document.createElement('button');
+smicheBtn.className = 'smiche-button';
+smicheBtn.textContent = '🐟 Smiche';
+smicheBtn.style.position = 'fixed';
+smicheBtn.style.top = '200px';  // Changed from 260px to 200px (above fix phone)
+smicheBtn.style.left = '20px';
+smicheBtn.style.padding = '10px 20px';
+smicheBtn.style.background = '#9b59b6';  // Purple color
+smicheBtn.style.color = 'white';
+smicheBtn.style.border = 'none';
+smicheBtn.style.borderRadius = '8px';
+smicheBtn.style.cursor = 'pointer';
+smicheBtn.style.fontSize = '18px';
+smicheBtn.style.zIndex = '1010';
+smicheBtn.style.transition = 'all 0.3s';
+
+smicheBtn.addEventListener('mouseover', () => {
+    smicheBtn.style.transform = 'scale(1.1)';
+    smicheBtn.style.background = '#8e44ad';
+});
+
+smicheBtn.addEventListener('mouseout', () => {
+    smicheBtn.style.transform = 'scale(1)';
+    smicheBtn.style.background = '#9b59b6';
+});
+
+smicheBtn.onclick = () => {
+    const smiche = document.createElement('img');
+    smiche.className = 'smiche';
+    smiche.src = 'smiche.gif';  // Note: This file needs to be available
+    smiche.alt = 'Bouncing Smiche';
+    smiche.style.left = Math.random() * (window.innerWidth - 100) + 'px';  // Random horizontal position
+    document.body.appendChild(smiche);
+};
+
+// Create gun button
+const gunBtn = document.createElement('button');
+gunBtn.className = 'gun-button';
+gunBtn.textContent = '🔫 Shoot';
+gunBtn.style.position = 'fixed';
+gunBtn.style.top = '260px';  // Changed from 320px to 260px (below fix phone)
+gunBtn.style.left = '20px';
+gunBtn.style.padding = '10px 20px';
+gunBtn.style.background = '#e74c3c';  // Red color
+gunBtn.style.color = 'white';
+gunBtn.style.border = 'none';
+gunBtn.style.borderRadius = '8px';
+gunBtn.style.cursor = 'pointer';
+gunBtn.style.fontSize = '18px';
+gunBtn.style.zIndex = '1010';
+gunBtn.style.transition = 'all 0.3s';
+
+let shootingMode = false;
+const shootSound = new Audio('shot.mp3');
+
+gunBtn.onclick = () => {
+    shootingMode = !shootingMode;
+    document.body.classList.toggle('crosshair-cursor');
+    gunBtn.style.background = shootingMode ? '#c0392b' : '#e74c3c';
+};
+
+// Add click handler for shooting
+document.addEventListener('click', (e) => {
+    if (shootingMode && e.target !== gunBtn) {
+        shootSound.currentTime = 0;
+        shootSound.play();
+        
+        const target = e.target;
+        target.classList.add('bleeding');
+        
+        // If the target is a button or interactive element,
+        // disable its functionality
+        if (target.tagName === 'BUTTON') {
+            target.disabled = true;
+        }
+        target.style.pointerEvents = 'none';
+        
+        // Remove the element after bleeding animation
+        setTimeout(() => {
+            if (target.parentNode) {
+                target.parentNode.removeChild(target);
+            }
+        }, 1000);
+        
+        // Prevent event bubbling
+        e.stopPropagation();
+    }
+});
+
+// Create horse button
+const horseBtn = document.createElement('button');
+horseBtn.className = 'horse-button';
+horseBtn.textContent = '🐎 Horse Mitosis';
+horseBtn.style.position = 'fixed';
+horseBtn.style.top = '320px';
+horseBtn.style.left = '20px';
+horseBtn.style.padding = '10px 20px';
+horseBtn.style.background = '#8e44ad';
+horseBtn.style.color = 'white';
+horseBtn.style.border = 'none';
+horseBtn.style.borderRadius = '8px';
+horseBtn.style.cursor = 'pointer';
+horseBtn.style.fontSize = '18px';
+horseBtn.style.zIndex = '1010';
+horseBtn.style.transition = 'all 0.3s';
+
+// Horse mitosis functionality
+function createHorse() {
+    const horse = document.createElement('img');
+    horse.src = 'horse.gif';
+    horse.className = 'horse';
+    horse.alt = 'Horse';
+    horse.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+    horse.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+    document.body.appendChild(horse);
+    
+    function moveHorse() {
+        const newX = Math.random() * (window.innerWidth - 100);
+        const newY = Math.random() * (window.innerHeight - 100);
+        horse.style.left = newX + 'px';
+        horse.style.top = newY + 'px';
+    }
+    
+    function splitHorse() {
+        if (document.querySelectorAll('.horse').length < 50) {  // Limit to prevent crash
+            // Play sound with new instance each time
+            if (!isMuted) {
+                const horseSound = new Audio('HORSE.mp3');
+                horseSound.play();
+            }
+            
+            // Animation
+            horse.style.animation = 'horseMitosis 1s';
+            setTimeout(() => { horse.style.animation = ''; }, 1000);
+            
+            // Create new horse
+            createHorse();
+        }
+    }
+    
+    // Move every 2 seconds
+    setInterval(moveHorse, 2000);
+    
+    // Split every 5-10 seconds
+    const splitInterval = Math.random() * 5000 + 5000; // Random between 5-10 seconds
+    setInterval(splitHorse, splitInterval);
+}
+
+horseBtn.onclick = () => createHorse();
+
+// Add button to document
+document.body.appendChild(horseBtn);
+document.body.appendChild(gunBtn);
+document.body.appendChild(smicheBtn);
 </script>
 </body></html>
