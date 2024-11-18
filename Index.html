@@ -1,0 +1,147 @@
+<html><head><base href="/">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    flex-direction: column;
+}
+
+#progress-container {
+    width: 80%;
+    max-width: 600px;
+    background-color: #ddd;
+    border-radius: 10px;
+    padding: 3px;
+    position: relative;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 30px;
+    background-color: #4CAF50;
+    border-radius: 8px;
+    transition: width 0.5s ease;
+}
+
+#percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #000;
+    font-weight: bold;
+}
+
+#error-message {
+    color: #ff0000;
+    font-size: 1.2em;
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#maintenance-message {
+    font-family: 'Playfair Display', serif;
+    font-size: 2em;
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#construction-image {
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#volume-control {
+    margin-top: 20px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.volume-slider {
+    width: 200px;
+    height: 15px;
+}
+</style>
+</head>
+<body>
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+        <div id="percentage">0%</div>
+    </div>
+    <div id="error-message">Error: System Malfunction</div>
+    <div id="maintenance-message">Puslapis yra tvarkomas</div>
+    <img id="construction-image" src="construction.gif" alt="Construction in progress animation, retro style" width="200" height="200">
+    <div id="volume-control">
+        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.5">
+    </div>
+    <audio id="airplane-sound" src="airplanes.mp3"></audio>
+
+<script>
+let progress = 0;
+const progressBar = document.getElementById('progress-bar');
+const percentageText = document.getElementById('percentage');
+const errorMessage = document.getElementById('error-message');
+const maintenanceMessage = document.getElementById('maintenance-message');
+const constructionImage = document.getElementById('construction-image');
+const volumeControl = document.getElementById('volume-control');
+const airplaneSound = document.getElementById('airplane-sound');
+
+// Set up volume control
+volumeControl.querySelector('.volume-slider').addEventListener('input', (e) => {
+    airplaneSound.volume = e.target.value;
+});
+
+function updateProgress() {
+    if (progress < 99) {
+        progress += Math.random() * 2;
+        if (progress > 99) progress = 99;
+        
+        progressBar.style.width = progress + '%';
+        percentageText.textContent = Math.floor(progress) + '%';
+        
+        setTimeout(updateProgress, 100);
+    } else {
+        // Show error
+        errorMessage.style.opacity = '1';
+        
+        // Wait 2 seconds then fade out progress bar and error
+        setTimeout(() => {
+            progressBar.style.opacity = '0';
+            percentageText.style.opacity = '0';
+            errorMessage.style.opacity = '0';
+            
+            // Show maintenance message
+            setTimeout(() => {
+                document.getElementById('progress-container').style.display = 'none';
+                maintenanceMessage.style.opacity = '1';
+                
+                // Show construction gif after 2 seconds
+                setTimeout(() => {
+                    constructionImage.style.opacity = '1';
+                    airplaneSound.play();
+                    
+                    // Show volume slider after another 2 seconds
+                    setTimeout(() => {
+                        volumeControl.style.opacity = '1';
+                    }, 2000);
+                }, 2000);
+            }, 500);
+        }, 2000);
+    }
+}
+
+// Start the progress bar when page loads
+window.onload = updateProgress;
+</script>
+</body></html>
