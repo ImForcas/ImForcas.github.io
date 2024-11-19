@@ -1,211 +1,95 @@
-<html><head><base href="/">
+<html><head>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap');
-
-body {
-    margin: 0;
-    padding: 0;
+.button-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    flex-direction: column;
+    height: 100vh;
+    gap: 2rem;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+}
+
+.redirect-button {
+    padding: 1.5rem 3rem;
+    font-size: 1.2rem;
+    font-family: 'Arial', sans-serif;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
     overflow: hidden;
 }
 
-#progress-container {
-    width: 80%;
-    max-width: 600px;
-    background-color: #ddd;
-    border-radius: 10px;
-    padding: 3px;
-    position: relative;
+.google-btn {
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    color: white;
+    box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
 }
 
-#progress-bar {
-    width: 0%;
-    height: 30px;
-    background-color: #4CAF50;
-    border-radius: 8px;
-    transition: width 0.5s ease;
+.github-btn {
+    background: linear-gradient(45deg, #333, #24292e);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-#percentage {
+.redirect-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.redirect-button:active {
+    transform: translateY(1px);
+}
+
+/* Add ripple effect */
+.redirect-button::after {
+    content: '';
     position: absolute;
     top: 50%;
     left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
     transform: translate(-50%, -50%);
-    color: #000;
-    font-weight: bold;
+    transition: width 0.6s, height 0.6s;
 }
 
-#error-message {
-    color: #ff0000;
-    font-size: 1.2em;
-    margin-top: 20px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-#maintenance-message {
-    font-family: 'Playfair Display', serif;
-    font-size: 2em;
-    margin-top: 20px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-#construction-image {
-    margin-top: 20px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-
-#volume-control {
-    margin-top: 20px;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 1000;
-}
-
-.volume-slider {
-    width: 200px;
-    height: 15px;
-}
-
-.floating-gif {
-    position: absolute;
-    opacity: 0;
-    transition: opacity 1s ease;
-    pointer-events: none;
+.redirect-button:hover::after {
+    width: 300px;
+    height: 300px;
 }
 </style>
 </head>
 <body>
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-        <div id="percentage">0%</div>
+    <div class="button-container">
+        <button class="redirect-button google-btn" onclick="window.location.href='./Wordle/Wordle.html'">
+            Go to Wordl
+        </button>
+        <button class="redirect-button github-btn" onclick="window.location.href='./matematika/matematika.html'">
+            Go to hacker
+        </button>
     </div>
-    <div id="error-message">Error: System Malfunction</div>
-    <div id="maintenance-message">Puslapis yra tvarkomas</div>
-    <img id="construction-image" src="construction.gif" alt="Construction in progress animation, retro style" width="200" height="200">
-    <div id="volume-control">
-        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="0.5">
-    </div>
-    <audio id="airplane-sound" src="airplanes.mp3"></audio>
 
-<script>
-let progress = 0;
-const progressBar = document.getElementById('progress-bar');
-const percentageText = document.getElementById('percentage');
-const errorMessage = document.getElementById('error-message');
-const maintenanceMessage = document.getElementById('maintenance-message');
-const constructionImage = document.getElementById('construction-image');
-const volumeControl = document.getElementById('volume-control');
-const airplaneSound = document.getElementById('airplane-sound');
-
-function createFloatingGif() {
-    const gif = document.createElement('img');
-    gif.src = 'construction.gif';
-    gif.alt = 'Floating construction animation';
-    gif.width = 100;
-    gif.height = 100;
-    gif.className = 'floating-gif';
-    gif.style.left = Math.random() * (window.innerWidth - 100) + 'px';
-    gif.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-    document.body.appendChild(gif);
-    
-    setTimeout(() => {
-        gif.style.opacity = '1';
-    }, 100);
-
-    let angle = Math.random() * Math.PI * 2;
-    const speed = 0.5 + Math.random();
-
-    function moveGif() {
-        const rect = gif.getBoundingClientRect();
-        let x = rect.left;
-        let y = rect.top;
-
-        x += Math.cos(angle) * speed;
-        y += Math.sin(angle) * speed;
-
-        if (x < -100) x = window.innerWidth;
-        if (x > window.innerWidth) x = -100;
-        if (y < -100) y = window.innerHeight;
-        if (y > window.innerHeight) y = -100;
-
-        gif.style.left = x + 'px';
-        gif.style.top = y + 'px';
-
-        requestAnimationFrame(moveGif);
-    }
-
-    moveGif();
-}
-
-// Set up volume control
-volumeControl.querySelector('.volume-slider').addEventListener('input', (e) => {
-    airplaneSound.volume = e.target.value;
-});
-
-function updateProgress() {
-    if (progress < 99) {
-        progress += Math.random() * 2;
-        if (progress > 99) progress = 99;
-        
-        progressBar.style.width = progress + '%';
-        percentageText.textContent = Math.floor(progress) + '%';
-        
-        setTimeout(updateProgress, 100);
-    } else {
-        // Show error
-        errorMessage.style.opacity = '1';
-        
-        // Wait 2 seconds then fade out progress bar and error
-        setTimeout(() => {
-            progressBar.style.opacity = '0';
-            percentageText.style.opacity = '0';
-            errorMessage.style.opacity = '0';
-            
-            // Show maintenance message
-            setTimeout(() => {
-                document.getElementById('progress-container').style.display = 'none';
-                maintenanceMessage.style.opacity = '1';
+    <script>
+        // Add click animation
+        document.querySelectorAll('.redirect-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                let ripple = document.createElement('div');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
                 
-                // Show construction gif after 2 seconds
+                let x = e.clientX - e.target.offsetLeft;
+                let y = e.clientY - e.target.offsetTop;
+                
+                ripple.style.left = `${x}px`;
+                ripple.style.top = `${y}px`;
+                
                 setTimeout(() => {
-                    constructionImage.style.opacity = '1';
-                    airplaneSound.play();
-                    
-                    // Show volume slider after another 2 seconds
-                    setTimeout(() => {
-                        volumeControl.style.opacity = '1';
-                        
-                        // Start creating floating gifs after 5 more seconds
-                        setTimeout(() => {
-                            // Create initial batch of gifs
-                            for(let i = 0; i < 5; i++) {
-                                createFloatingGif();
-                            }
-                            
-                            // Continue adding new gifs periodically
-                            setInterval(() => {
-                                if(document.querySelectorAll('.floating-gif').length < 15) {
-                                    createFloatingGif();
-                                }
-                            }, 3000);
-                        }, 5000);
-                    }, 2000);
-                }, 2000);
-            }, 500);
-        }, 2000);
-    }
-}
-
-// Start the progress bar when page loads
-window.onload = updateProgress;
-</script>
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    </script>
 </body></html>

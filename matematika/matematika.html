@@ -1,0 +1,190 @@
+<html><head><base href="." /><meta charset="UTF-8"><title>Matrix Math Challenge</title><style>body {background-color: #000;color: #0f0;font-family: 'Courier New', monospace;margin: 0;padding: 20px;overflow: hidden;}.matrix-bg {position: fixed;top: 0;left: 0;width: 100%;height: 100%;z-index: -1;opacity: 0;transition: opacity 1s ease-in-out;}.fade-content {opacity: 0;transition: opacity 2s ease-in-out;}.genius-image {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);opacity: 0;transition: opacity 2s ease-in-out;z-index: 10;display: none;}h1 {text-align: center;font-size: 2.5em;text-shadow: 0 0 10px #0f0;margin-bottom: 50px;}.button-container {display: flex;justify-content: center;gap: 20px;margin-bottom: 30px;}.button-container button {background: #000; border: 2px solid #0f0;color: #0f0;padding: 15px 30px;font-size: 1.2em;cursor: pointer;transition: all 0.3s;}button:hover {background: #0f02;box-shadow: 0 0 20px #0f0;}.game-container {text-align: center;font-size: 1.5em;margin-top: 50px;}.countdown {font-size: 3em;margin: 20px;}.problem {font-size: 2em;margin: 20px;background: #000;padding: 20px;display: inline-block;border: 1px solid #0f0;}.feedback {position: fixed;top: 50%;left: 50%;transform: translate(-50%, -50%);font-size: 4em;color: #f00;text-shadow: 0 0 10px #f00;display: none;z-index: 100;}.input[type="text"] {background: transparent;border: 2px solid #0f0;color: #0f0;padding: 10px;font-size: 1.2em;width: 200px;text-align: center;}.leaderboard {margin-top: 30px;border: 1px solid #0f0;padding: 20px;display: none;}.timer, .score {font-size: 1.5em;margin: 20px;background: #000;padding: 10px;border: 2px solid #0f0;display: inline-block;}.volume-control {position: fixed;top: 20px;right: 20px;display: flex;align-items: center;gap: 10px;z-index: 1000;background: #000;padding: 10px;border: 1px solid #0f0;}.volume-slider {-webkit-appearance: none;width: 100px;height: 4px;background: #0f0;outline: none;opacity: 0.7;transition: opacity .2s;cursor: pointer;}.volume-slider:hover {opacity: 1;}.volume-slider::-webkit-slider-thumb {-webkit-appearance: none;appearance: none;width: 15px;height: 15px;background: #000;border: 2px solid #0f0;cursor: pointer;border-radius: 50%;}.volume-slider::-moz-range-thumb {width: 15px;height: 15px;background: #000;border: 2px solid #0f0;cursor: pointer;border-radius: 50%;}.volume-label {color: #0f0;font-family: 'Courier New', monospace;}.gif-display {position: static !important;display: block;margin: 20px auto;opacity: 0;transition: opacity 0.5s ease-in-out;}.correct-answer {color: #0f0;margin-left: 20px;display: inline-block;font-size: 1.2em;}.notice {
+  text-align: center;
+  color: #0f0;
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  text-shadow: 0 0 5px #0f0;
+}
+
+#vytasButton {
+  display: none;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}</style></head><body><div class="volume-control"><span class="volume-label">Volume:</span><input type="range" min="0" max="100" value="50" class="volume-slider" id="volumeControl"></div><canvas class="matrix-bg" id="matrix"></canvas><img src="only for genius.png" alt="einstein touching temple with text 'Only For Genius??' against dark background" class="genius-image" id="geniusImage"><div class="fade-content" id="mainContent"><h1>Domo Palubinsko matematika</h1><p class="notice">Created by evil anonymous hackers. Round down decimal answers to nearest whole number.</p><div class="button-container" id="difficultyButtons"><button onclick="startGame('noob')">NOOB</button><button onclick="startGame('pro')">PRO</button><button onclick="startGame('hacker')">HACKER</button><button id="vytasButton" onclick="startGame('vytas')" style="display: none">VYTAS</button></div></div><div class="game-container" id="gameContainer" style="display:none;"><div class="countdown" id="countdown"></div><div style="margin-bottom: 20px;"><div class="timer" id="timer"></div><div class="score" id="score">Score: 0</div></div><div class="problem" id="problem"></div><input type="text" id="answer" placeholder="Enter answer" onkeypress="checkEnter(event)"><br><button onclick="giveUp()" style="margin-top: 20px;">Give Up</button></div><div class="feedback" id="feedback">DUMBASS</div><div class="leaderboard" id="leaderboard"></div><img id="gifDisplay" class="gif-display"><script>const canvas = document.getElementById('matrix');const ctx = canvas.getContext('2d');canvas.width = window.innerWidth;canvas.height = window.innerHeight;const matrixChars = "0123456789ABCDEF";const fontSize = 16;const columns = canvas.width/fontSize;const drops = [];for(let x = 0; x < columns; x++) {drops[x] = 1;}function drawMatrix() {ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';ctx.fillRect(0, 0, canvas.width, canvas.height);ctx.fillStyle = '#0F0';ctx.font = fontSize + 'px monospace';for(let i = 0; i < drops.length; i++) {const text = matrixChars.charAt(Math.floor(Math.random() * matrixChars.length));ctx.fillText(text, i*fontSize, drops[i]*fontSize);if(drops[i]*fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;drops[i]++;}}let matrixInterval;let currentScore = 0;let timeLeft = 300;let gameInterval;let currentAnswer;let currentDifficulty;const correctSound = new Audio('yes.mp3');const wrongSound = new Audio('no.mp3');const backgroundMusic = new Audio('clubbed to death.mp3');backgroundMusic.loop = true;let gameStarted = false;const volumeControl = document.getElementById('volumeControl');volumeControl.addEventListener('input', function() {const volume = this.value / 100;backgroundMusic.volume = volume;correctSound.volume = volume;wrongSound.volume = volume;});function factorial(n) {if (n === 0 || n === 1) return 1;return n * factorial(n - 1);}function giveUp() {clearInterval(gameInterval);currentScore = 0;document.getElementById('gameContainer').style.display = 'none';document.getElementById('difficultyButtons').style.display = 'flex';}function generateNoobProblem() {let nums = [];for(let i = 0; i < 3; i++) {nums.push(Math.floor(Math.random() * 90 + 10));}let ops = ['+', '-'];let expression = `${nums[0]} ${ops[Math.floor(Math.random() * ops.length)]} ${nums[1]} ${ops[Math.floor(Math.random() * ops.length)]} ${nums[2]}`;let answer = eval(expression);return {expression, answer};}function generateProProblem() {
+    let nums = [];
+    let ops = ['+', '-', '*', '/'];
+    let expression = '';
+    let hasMultiplicationOrDivision = false;
+    
+    // First number
+    nums.push(Math.floor(Math.random() * 90) + 10);
+    expression = nums[0];
+    
+    // Generate remaining numbers and operators
+    for(let i = 1; i < 5; i++) {
+        let op;
+        // Force at least one multiplication or division if we haven't had one yet
+        // and we're at the last operation
+        if (i === 4 && !hasMultiplicationOrDivision) {
+            op = Math.random() < 0.5 ? '*' : '/';
+        } else {
+            op = ops[Math.floor(Math.random() * ops.length)];
+        }
+        
+        // Track if we've used multiplication or division
+        if (op === '*' || op === '/') {
+            hasMultiplicationOrDivision = true;
+            nums.push(Math.floor(Math.random() * 9) + 1); // Smaller numbers for mult/div
+        } else {
+            nums.push(Math.floor(Math.random() * 90) + 10);
+        }
+        
+        expression += ` ${op} ${nums[i]}`;
+    }
+    
+    let answer;
+    try {
+        answer = Math.floor(eval(expression));
+        
+        // Validate the answer
+        if (Math.abs(answer) > 1000 || !Number.isInteger(answer)) {
+            return generateProProblem();
+        }
+        
+        return {expression, answer};
+    } catch (e) {
+        return generateProProblem();
+    }
+}function generateHackerProblem() {
+    let nums = [];
+    let ops = ['+', '-', '*', '/', '^2', '^3', '!', '√'];
+    let expression = '';
+    
+    nums.push(Math.floor(Math.random() * 20 + 1));
+    expression = nums[0].toString();
+    
+    for(let i = 1; i < 4; i++) {
+        let op = ops[Math.floor(Math.random() * ops.length)];
+        let nextNum;
+        
+        switch(op) {
+            case '*':
+            case '/':
+                nextNum = Math.floor(Math.random() * 5 + 1);
+                expression += ` ${op} ${nextNum}`;
+                break;
+            case '^2':
+                expression += `^2`;
+                break;
+            case '^3':
+                expression += `^3`;
+                break;
+            case '!':
+                expression += `!`;
+                break;
+            case '√':
+                let base = Math.floor(Math.random() * 5 + 1);
+                nextNum = base * base;
+                expression += ` * √${nextNum}`;
+                break;
+            default:
+                nextNum = Math.floor(Math.random() * 20 + 1);
+                expression += ` ${op} ${nextNum}`;
+        }
+        nums.push(nextNum);
+    }
+
+    let answer = Math.floor(eval(expression));
+    return {expression, answer};
+}function generateVytasProblem() {
+    let num1 = Math.floor(Math.random() * 100) + 1;
+    let num2 = Math.floor(Math.random() * 100) + 1;
+    let expression = `${num1} + ${num2}`;
+    let answer = num1 + num2;
+    return { expression, answer };
+}function checkEnter(event) {
+    if (event.key === 'Enter') {
+        const userAnswer = parseInt(document.getElementById('answer').value);
+        const answerDisplay = document.createElement('span');
+        answerDisplay.className = 'correct-answer';
+        
+        if (userAnswer === currentAnswer) {
+            currentScore++;
+            document.getElementById('score').textContent = `Score: ${currentScore}`;
+            timeLeft += 5;
+            correctSound.play().catch(error => console.log("Audio playback failed:", error));
+            showCorrectAnimation();
+            answerDisplay.remove();
+        } else {
+            document.getElementById('feedback').style.display = 'block';
+            wrongSound.play().catch(error => console.log("Audio playback failed:", error));
+            timeLeft -= 10;
+            
+            // Show correct answer
+            answerDisplay.textContent = `Correct answer: ${currentAnswer}`;
+            document.getElementById('answer').parentNode.appendChild(answerDisplay);
+            
+            setTimeout(() => {
+                document.getElementById('feedback').style.display = 'none';
+                answerDisplay.remove();
+            }, 5000);
+        }
+        
+        document.getElementById('answer').value = '';
+        generateNewProblem();
+    }
+}let geniusClickCount = 0;
+
+document.getElementById('geniusImage').addEventListener('click', function() {
+    geniusClickCount++;
+    if (geniusClickCount === 20) {
+        const vytasButton = document.getElementById('vytasButton');
+        vytasButton.style.display = 'inline-block';
+        setTimeout(() => {
+            vytasButton.style.opacity = '1';
+        }, 100);
+    }
+});
+
+function generateNewProblem() {
+  let problem;
+  switch(currentDifficulty) {
+    case 'noob':
+      problem = generateNoobProblem();
+      break;
+    case 'pro':
+      problem = generateProProblem();
+      break;
+    case 'hacker':
+      problem = generateHackerProblem();
+      break;
+    case 'vytas':
+      problem = generateVytasProblem();
+      break;
+  }
+  document.getElementById('problem').textContent = problem.expression;
+  currentAnswer = Math.floor(problem.answer);
+}
+
+function showCorrectAnimation() {
+  const gifDisplay = document.getElementById('gifDisplay');
+  
+  if (currentDifficulty === 'vytas') {
+    gifDisplay.src = 'vyas.png';  // Changed from vytas.png to vyas.png
+  } else {
+    const randomGif = Math.floor(Math.random() * 9) + 1;
+    gifDisplay.src = `${randomGif}.gif`;
+  }
+  
+  gifDisplay.style.display = 'block';
+  gifDisplay.style.opacity = '1';
+  
+  setTimeout(() => {
+    gifDisplay.style.opacity = '0';
+    setTimeout(() => {
+      gifDisplay.style.display = 'none';
+    }, 500);
+  }, 3500);
+}
+
+window.addEventListener('load', () => {setTimeout(() => {canvas.style.opacity = '1';matrixInterval = setInterval(drawMatrix, 50);}, 5000);setTimeout(() => {document.getElementById('mainContent').style.opacity = '1';}, 10000);setTimeout(() => {if (!gameStarted) {const geniusImage = document.getElementById('geniusImage');geniusImage.style.display = 'block';setTimeout(() => {geniusImage.style.opacity = '1';}, 100);}}, 15000);backgroundMusic.play().catch(error => {console.log("Audio autoplay failed:", error);});});function startGame(difficulty) {gameStarted = true;document.getElementById('geniusImage').style.display = 'none';currentDifficulty = difficulty;currentScore = 0;timeLeft = 300;document.getElementById('difficultyButtons').style.display = 'none';document.getElementById('gameContainer').style.display = 'block';let count = 3;const countdownInterval = setInterval(() => {document.getElementById('countdown').textContent = count;count--;if (count < 0) {clearInterval(countdownInterval);document.getElementById('countdown').style.display = 'none';startGameplay();}} , 1000);backgroundMusic.play().catch(error => {console.log("Audio playback failed:", error);});}function startGameplay() {generateNewProblem();gameInterval = setInterval(() => {timeLeft--;const minutes = Math.floor(timeLeft / 60);const seconds = timeLeft % 60;document.getElementById('timer').textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;if (timeLeft <= 0) {endGame();}} , 1000);}function endGame() {clearInterval(gameInterval);const name = prompt('Game Over! Enter your name for the leaderboard:');if (name) {const scores = JSON.parse(localStorage.getItem(`${currentDifficulty}Scores`) || '[]');scores.push({ name, score: currentScore });scores.sort((a, b) => b.score - a.score);localStorage.setItem(`${currentDifficulty}Scores`, JSON.stringify(scores));displayLeaderboard();}document.getElementById('gameContainer').style.display = 'none';document.getElementById('difficultyButtons').style.display = 'flex';}function displayLeaderboard() {const scores = JSON.parse(localStorage.getItem(`${currentDifficulty}Scores`) || '[]');const leaderboard = document.getElementById('leaderboard');leaderboard.style.display = 'block';leaderboard.innerHTML = `<h2>${currentDifficulty.toUpperCase()} Leaderboard</h2>`;scores.slice(0, 10).forEach((entry, index) => {leaderboard.innerHTML += `<div>${index + 1}. ${entry.name}: ${entry.score}</div>`;});}</script></body></html>
