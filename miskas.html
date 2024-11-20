@@ -1,0 +1,796 @@
+<html><head><base href="/">
+<title>Horror Forest</title>
+<style>
+  body { margin: 0; }
+  canvas { width: 100%; height: 100%; display: block; }
+  #loadingScreen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: black;
+    color: red;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    font-family: 'Courier New', monospace;
+  }
+  #collectibles { 
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: 'Courier New', monospace;
+    font-size: 24px; /* Make text bigger */
+    z-index: 2500; /* Put above all other layers including flashlight and titlescreen */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Add shadow for better visibility */
+    font-weight: bold; /* Make text bolder */
+  }
+  #flashlight {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.85) 50%, rgba(0,0,0,1) 100%);
+    z-index: 500;
+  }
+  #titleScreen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: black;
+    color: red;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    font-family: 'Courier New', monospace;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  #warningText {
+    color: #ff0000;
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 40px;
+    animation: warningPulse 2s infinite;
+    text-shadow: 0 0 10px #ff0000;
+    font-weight: bold;
+    padding: 20px;
+    border: 3px solid #ff0000;
+    background-color: rgba(0,0,0,0.8);
+    max-width: 800px;
+  }
+  @keyframes warningPulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  #titleScreen h1 {
+    font-size: 3em;
+    margin: 30px 0;
+    text-shadow: 0 0 10px red;
+  }
+  #startButton {
+    padding: 15px 30px;
+    font-size: 1.5em;
+    background: red;
+    color: black;
+    border: none;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s;
+  }
+  #startButton:hover {
+    background: darkred;
+    color: white;
+    transform: scale(1.1);
+  }
+  #winScreen {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    color: green;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1500;
+    font-family: 'Courier New', monospace;
+  }
+  #redOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: rgba(255,0,0,0);
+    mix-blend-mode: multiply;
+    z-index: 100;
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+</head>
+<body>
+<div id="titleScreen">
+  <div id="warningText">WARNING: THIS GAME CONTAINS LOUD NOISES AND SUDDEN SCARES</div>
+  <h1>Domo Palubinsko Miškas</h1>
+  <button id="startButton">START</button>
+</div>
+<div id="loadingScreen">LOADING...</div>
+<div id="collectibles">Gangster Videos Found: 0/15</div>
+<div id="flashlight"></div>
+<div id="winScreen">
+  <h1>You Won!</h1>
+  <p>But at what cost...</p>
+</div>
+<div id="redOverlay"></div>
+
+<script>
+let scene, camera, renderer, player;
+let collectibles = [];
+let collectiblesFound = 0;
+let enemies = [];
+let enemySpeed = 0.075; // Base enemy speed increased by 1.5x
+const WORLD_SIZE = 1000; // Changed back to 1000 (2x larger)
+const TREE_COUNT = 200; // Doubled from 100
+const TOTAL_COLLECTIBLES = 15; // Changed from 7
+
+let trees = [];
+
+// Audio setup
+const ambientSound = new Howl({
+  src: ['/forest.mp3'],
+  loop: true,
+  volume: 0.3
+});
+
+const footstepSound = new Howl({
+  src: ['/foot.mp3'],
+  volume: 0.4,
+  rate: 1,  // Make sure it starts at normal speed
+  loop: true // Make sure it loops
+});
+
+const jumpscareSound = new Howl({
+  src: ['/baisu.mp3'],
+  volume: 1.0
+});
+
+// Add ding sound setup
+const dingSound = new Howl({
+  src: ['/ding.mp3'],
+  volume: 1.0
+});
+
+// Video sound setup
+const videoSound = new Howl({
+  src: ['dababygobbb.mp4'],
+  spatial: true,
+});
+
+let gameStarted = false;
+let viewBobbing = 0;
+let isEnemySpawned = false;
+
+// Add these variables at the top
+let lastTime = performance.now();
+const BASE_SPEED = 0.225; // Base movement speed increased by 1.5x
+const BASE_ENEMY_SPEED = 0.075; // Base enemy speed increased by 1.5x
+let deltaTime = 0;
+
+let playerSpeedMultiplier = 1;
+let viewBobbingIntensity = 1;
+let flashlightIntensity = 2.6; // Doubled from 1.3
+let flashlightAngle = (Math.PI/8) * 2.6; // Doubled from 1.3
+let flashlightDistance = 15 * 2.6; // Doubled from 1.3
+let enemyScale = 1; // Scale factor for enemies
+
+function init() {
+  scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x000000, 0.015); // Initial fog density
+  
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.y = 2;
+  
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  
+  // Ground
+  const groundTexture = new THREE.TextureLoader().load(createGroundTexture());
+  groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+  groundTexture.repeat.set(20, 20);
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(WORLD_SIZE, WORLD_SIZE),
+    new THREE.MeshPhongMaterial({ map: groundTexture, side: THREE.DoubleSide })
+  );
+  ground.rotation.x = Math.PI/2;
+  scene.add(ground);
+  
+  // Border walls
+  const wallMaterial = new THREE.MeshPhongMaterial({ color: 0x444444 });
+  const wallGeometry = new THREE.BoxGeometry(WORLD_SIZE, 20, 2);
+  const walls = [
+    { pos: [0, 10, WORLD_SIZE/2], rot: [0, 0, 0] },
+    { pos: [0, 10, -WORLD_SIZE/2], rot: [0, 0, 0] },
+    { pos: [WORLD_SIZE/2, 10, 0], rot: [0, Math.PI/2, 0] },
+    { pos: [-WORLD_SIZE/2, 10, 0], rot: [0, Math.PI/2, 0] }
+  ];
+  
+  walls.forEach(wall => {
+    const mesh = new THREE.Mesh(wallGeometry, wallMaterial);
+    mesh.position.set(...wall.pos);
+    mesh.rotation.set(...wall.rot);
+    scene.add(mesh);
+  });
+
+  createTrees(); // Create trees with new logic
+
+  // Player
+  player = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 1),
+    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+  );
+  scene.add(player);
+  
+  createVideoCollectibles();
+  
+  const light = new THREE.AmbientLight(0x202020);
+  scene.add(light);
+  
+  const flashlight = new THREE.SpotLight(0xffffff, flashlightIntensity);
+  flashlight.angle = flashlightAngle;
+  flashlight.penumbra = 0.2;
+  flashlight.distance = flashlightDistance;
+  flashlight.castShadow = true;
+  player.add(flashlight);
+  flashlight.position.set(0, 0, 1);
+  
+  // Add red overlay to the scene
+  const redOverlay = document.createElement('div');
+  redOverlay.id = 'redOverlay';
+  redOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: rgba(255,0,0,0);
+    mix-blend-mode: multiply;
+    z-index: 100;
+  `;
+  document.body.appendChild(redOverlay);
+
+  $("#startButton").click(startGame);
+
+  // Add mouse look controls
+  document.addEventListener('mousemove', (e) => {
+    if(document.pointerLockElement === renderer.domElement) {
+      rotation -= e.movementX * 0.002;
+    }
+  });
+}
+
+function startGame() {
+  $("#titleScreen").fadeOut(1000, () => {
+    $("#loadingScreen").hide();
+    gameStarted = true;
+    ambientSound.play();
+    animate();
+  });
+}
+
+function createGroundTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  // Changed base color to be greener
+  ctx.fillStyle = '#1a2a1a';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // Add noise with greenish tint
+  for(let i = 0; i < 5000; i++) {
+    ctx.fillStyle = `rgba(0,${Math.random() * 50},0,${Math.random() * 0.2})`;
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+  }
+  
+  return canvas.toDataURL();
+}
+
+function isPositionValid(x, z, existingElements, radius) {
+  // Check distance from other trees
+  for(let elem of existingElements) {
+    const dx = x - elem.position.x;
+    const dz = z - elem.position.z;
+    const minDistance = radius + elem.radius;
+    if(Math.sqrt(dx * dx + dz * dz) < minDistance) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function createTrees() {
+  const treeTexture = new THREE.TextureLoader().load(createTreeTexture());
+  const treeMaterial = new THREE.MeshPhongMaterial({ map: treeTexture });
+  
+  let attempts = 0;
+  const maxAttempts = 1000;
+  
+  while(trees.length < TREE_COUNT && attempts < maxAttempts) {
+    const x = Math.random() * WORLD_SIZE - WORLD_SIZE/2;
+    const z = Math.random() * WORLD_SIZE - WORLD_SIZE/2;
+    
+    // Check if position is valid (away from trees and collectibles)
+    if(isPositionValid(x, z, [...trees, ...collectibles], 4)) {
+      const trunkGeometry = new THREE.CylinderGeometry(1, 1.5, 15);
+      const topGeometry = new THREE.ConeGeometry(4, 10, 8);
+      const trunk = new THREE.Mesh(trunkGeometry, treeMaterial);
+      const top = new THREE.Mesh(topGeometry, new THREE.MeshPhongMaterial({ color: 0x006400 }));
+      
+      const treeGroup = new THREE.Group();
+      trunk.position.y = 7.5;
+      top.position.y = 17;
+      treeGroup.add(trunk);
+      treeGroup.add(top);
+      
+      treeGroup.position.set(x, 0, z);
+      
+      trees.push({
+        mesh: treeGroup,
+        radius: 3,
+        position: new THREE.Vector3(x, 0, z)
+      });
+      
+      scene.add(treeGroup);
+    }
+    attempts++;
+  }
+}
+
+function createTreeTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  // Changed base color to be slightly redder
+  ctx.fillStyle = '#4a1810';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  // Add bark texture with reddish tint
+  for(let i = 0; i < 1000; i++) {
+    ctx.fillStyle = `rgba(30,0,0,${Math.random() * 0.3})`;
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 4, 1);
+  }
+  
+  return canvas.toDataURL();
+}
+
+function createVideoCollectibles() {
+  const videoGeometry = new THREE.PlaneGeometry(2, 1.5);
+  
+  // Create video element and texture
+  const video = document.createElement('video');
+  video.src = 'dababygobbb.mp4';
+  video.loop = true;
+  video.muted = true;
+  video.play();
+  
+  const videoTexture = new THREE.VideoTexture(video);
+  
+  // Create a glow effect by using multiple layers
+  const videoMaterial = new THREE.MeshBasicMaterial({ 
+    map: videoTexture,
+    transparent: true,
+    opacity: 0.8,
+    side: THREE.DoubleSide
+  });
+
+  // Add a glowing outline
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    transparent: true,
+    opacity: 0.4,
+    side: THREE.DoubleSide
+  });
+  
+  for(let i = 0; i < TOTAL_COLLECTIBLES; i++) {
+    const videoGroup = new THREE.Group();
+    
+    // Create main video plane
+    const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial.clone());
+    
+    // Create glow plane (slightly larger)
+    const glowGeometry = new THREE.PlaneGeometry(2.4, 1.9);
+    const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+    glowMesh.position.z = -0.01;  // Slightly behind main video
+    
+    videoGroup.add(glowMesh);
+    videoGroup.add(videoMesh);
+    
+    videoGroup.position.x = Math.random() * (WORLD_SIZE-100) - (WORLD_SIZE-100)/2;
+    videoGroup.position.z = Math.random() * (WORLD_SIZE-100) - (WORLD_SIZE-100)/2;
+    videoGroup.position.y = 2;
+    collectibles.push(videoGroup);
+    scene.add(videoGroup);
+  }
+}
+
+function spawnNewEnemy() {
+  const edgarTexture = new THREE.TextureLoader().load('/edgars.jpg');
+  const newEnemy = new THREE.Mesh(
+    new THREE.PlaneGeometry(3 * enemyScale, 3 * enemyScale),
+    new THREE.MeshBasicMaterial({ map: edgarTexture, transparent: true })
+  );
+  
+  let validPosition = false;
+  let attempts = 0;
+  let newPosition;
+  
+  while(!validPosition && attempts < 100) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = WORLD_SIZE / 2 - 10;
+    newPosition = new THREE.Vector3(
+      Math.cos(angle) * distance,
+      2 + (enemyScale * 0.2), // Adjust height based on scale to stay above ground
+      Math.sin(angle) * distance
+    );
+    
+    // Check distance from other enemies
+    validPosition = true;
+    for(const enemy of enemies) {
+      const dist = newPosition.distanceTo(enemy.position);
+      if(dist < 10 * enemyScale) {
+        validPosition = false;
+        break;
+      }
+    }
+    attempts++;
+  }
+  
+  if(validPosition) {
+    newEnemy.position.copy(newPosition);
+  } else {
+    // Fallback position if no valid spot found
+    newEnemy.position.set(0, 2 + (enemyScale * 0.2), 0);
+  }
+  
+  newEnemy.visible = true;
+  scene.add(newEnemy);
+  enemies.push(newEnemy);
+  return newEnemy;
+}
+
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
+let rotation = 0;
+
+document.addEventListener('keydown', (e) => {
+  switch(e.key) {
+    case 'w': moveBackward = true; if(!footstepSound.playing()) footstepSound.play(); break;  // Reversed
+    case 's': moveForward = true; if(!footstepSound.playing()) footstepSound.play(); break;   // Reversed
+    case 'a': moveLeft = true; if(!footstepSound.playing()) footstepSound.play(); break;
+    case 'd': moveRight = true; if(!footstepSound.playing()) footstepSound.play(); break;
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  switch(e.key) {
+    case 'w': moveBackward = false; break;  // Reversed
+    case 's': moveForward = false; break;   // Reversed
+    case 'a': moveLeft = false; break;
+    case 'd': moveRight = false; break;
+  }
+  // Only stop the sound if no movement keys are pressed
+  if(!moveForward && !moveBackward && !moveLeft && !moveRight) {
+    footstepSound.stop();
+  }
+});
+
+function checkCollision(pos1, pos2, threshold = 2) {
+  return Math.abs(pos1.x - pos2.x) < threshold &&
+         Math.abs(pos1.z - pos2.z) < threshold;
+}
+
+function checkTreeCollision(playerPos) {
+  for(let tree of trees) {
+    const dx = playerPos.x - tree.position.x;
+    const dz = playerPos.z - tree.position.z;
+    const distance = Math.sqrt(dx * dx + dz * dz);
+    if(distance < tree.radius) return true;
+  }
+  return false;
+}
+
+function jumpscare() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/edgars.jpg') center center no-repeat;
+    background-size: 150% 150%;
+    z-index: 1000;
+    animation: zoomJitter 1s linear;
+  `;
+  
+  // Add the animation keyframes to the document
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes zoomJitter {
+      0% {
+        background-size: 100% 100%;
+        transform: translate(0, 0);
+      }
+      25% {
+        background-size: 300% 300%;
+        transform: translate(5px, 5px);
+      }
+      50% {
+        background-size: 400% 400%;
+        transform: translate(-5px, -3px);
+      }
+      75% {
+        background-size: 500% 500%;
+        transform: translate(-3px, 5px);
+      }
+      90% {
+        background-size: 600% 600%;
+        transform: translate(5px, -5px);
+      }
+      100% {
+        background-size: 700% 700%;
+        transform: translate(0, 0);
+      }
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(overlay);
+  jumpscareSound.play();
+  
+  setTimeout(() => {
+    location.reload();
+  }, 1000);
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  
+  if(!gameStarted) return;
+
+  // Calculate delta time
+  const currentTime = performance.now();
+  deltaTime = (currentTime - lastTime) / 16.667; // Normalize to 60fps
+  lastTime = currentTime;
+  
+  const speed = BASE_SPEED * deltaTime * playerSpeedMultiplier; // Apply delta time to movement speed
+  const newPosition = player.position.clone();
+  
+  if(moveForward) {
+    newPosition.x += Math.sin(rotation) * speed;
+    newPosition.z += Math.cos(rotation) * speed;
+  }
+  if(moveBackward) {
+    newPosition.x -= Math.sin(rotation) * speed;
+    newPosition.z -= Math.cos(rotation) * speed;
+  }
+  if(moveLeft) {
+    newPosition.x -= Math.cos(rotation) * speed;
+    newPosition.z += Math.sin(rotation) * speed;
+  }
+  if(moveRight) {
+    newPosition.x += Math.cos(rotation) * speed;
+    newPosition.z -= Math.sin(rotation) * speed;
+  }
+  
+  // Check if new position is valid (within bounds and not colliding with trees)
+  if(!checkTreeCollision(newPosition) &&
+     Math.abs(newPosition.x) < WORLD_SIZE/2 - 2 &&
+     Math.abs(newPosition.z) < WORLD_SIZE/2 - 2) {
+    player.position.copy(newPosition);
+  }
+  
+  // Update view bobbing with delta time
+  if(moveForward || moveBackward || moveLeft || moveRight) {
+    viewBobbing += 0.1 * deltaTime;
+    camera.position.y = 2 + Math.sin(viewBobbing) * (0.1 * viewBobbingIntensity);
+  } else {
+    camera.position.y = 2;
+  }
+
+  camera.position.x = player.position.x;
+  camera.position.z = player.position.z;
+  camera.rotation.y = rotation;
+  
+  // Update collectibles rotation and glow
+  collectibles.forEach(videoGroup => {
+    if(videoGroup.visible) {
+      videoGroup.rotation.y += 0.02 * deltaTime;
+      videoGroup.position.y = 2 + Math.sin(Date.now() * 0.002) * 0.2;
+      
+      // Pulse the glow
+      const glowMesh = videoGroup.children[0];
+      glowMesh.material.opacity = 0.4 + Math.sin(Date.now() * 0.003) * 0.2;
+    }
+  });
+  
+  // Check if 14 collectibles have been found
+  if(collectiblesFound === 14) {
+    collectibles.forEach(videoGroup => {
+      if(videoGroup.visible) {
+        // Make the last remaining video super bright
+        const glowMesh = videoGroup.children[0];
+        glowMesh.material.opacity = 2 + Math.sin(Date.now() * 0.003) * 0.5;
+        glowMesh.scale.set(4, 4, 4);
+        
+        // Add point light to make it visible from far away
+        if(!videoGroup.children[2]) {
+          const pointLight = new THREE.PointLight(0xffffff, 5, 100);
+          pointLight.position.set(0, 0, 0);
+          videoGroup.add(pointLight);
+        }
+      }
+    });
+  }
+
+  // Update enemy movement with delta time
+  if(isEnemySpawned) {
+    enemies.forEach(currentEnemy => {
+      const directionX = player.position.x - currentEnemy.position.x;
+      const directionZ = player.position.z - currentEnemy.position.z;
+      const length = Math.sqrt(directionX * directionX + directionZ * directionZ);
+      
+      const currentEnemySpeed = enemySpeed * deltaTime;
+      
+      // Calculate new position
+      const newX = currentEnemy.position.x + (directionX/length) * currentEnemySpeed;
+      const newZ = currentEnemy.position.z + (directionZ/length) * currentEnemySpeed;
+      
+      // Check collision with other enemies
+      let canMove = true;
+      for(const otherEnemy of enemies) {
+        if(otherEnemy !== currentEnemy) {
+          const dist = new THREE.Vector3(newX, 2 + (enemyScale * 0.2), newZ).distanceTo(otherEnemy.position);
+          if(dist < 5 * enemyScale) {
+            canMove = false;
+            break;
+          }
+        }
+      }
+      
+      if(canMove) {
+        currentEnemy.position.x = newX;
+        currentEnemy.position.z = newZ;
+        // Ensure proper height based on current scale
+        currentEnemy.position.y = 2 + (enemyScale * 0.2);
+      }
+      
+      currentEnemy.lookAt(player.position);
+      
+      if(checkCollision(player.position, currentEnemy.position)) {
+        jumpscare();
+      }
+    });
+  }
+
+  // Check collectibles
+  collectibles.forEach((videoGroup, index) => {
+    if(videoGroup.visible && checkCollision(player.position, videoGroup.position)) {
+      videoGroup.visible = false;
+      collectiblesFound++;
+      
+      // Play the ding sound when collecting
+      dingSound.play();
+
+      // Spawn enemy after first collectible
+      if(collectiblesFound === 1) {
+        isEnemySpawned = true;
+        const firstEnemy = spawnNewEnemy();
+        enemies.push(firstEnemy);
+      } else {
+        const newEnemy = spawnNewEnemy();
+      }
+      
+      // Update environmental effects
+      scene.fog.density *= 0.95; // Make fog less dense
+      scene.children.forEach(child => {
+        if(child instanceof THREE.AmbientLight) {
+          child.intensity *= 1.1; // Increase ambient light
+        }
+      });
+      
+      // Increase speeds and effects (updated multipliers)
+      playerSpeedMultiplier *= 1.2; // Changed from 1.1
+      enemySpeed = BASE_ENEMY_SPEED * Math.pow(1.22, collectiblesFound); // Changed from 1.15
+      viewBobbingIntensity *= 1.2; // Changed from 1.1
+      flashlightIntensity *= 1.3; // Changed from 1.2
+      flashlightAngle *= 1.3; // Changed from 1.2
+      flashlightDistance *= 1.3; // Changed from 1.2
+
+      // Update enemy scale
+      enemyScale *= 1.05;
+      enemies.forEach(enemy => {
+        enemy.scale.set(enemyScale, enemyScale, enemyScale);
+        // Update height when scale changes
+        enemy.position.y = 2 + (enemyScale * 0.2);
+      });
+      
+      // Update flashlight parameters
+      const flashlight = player.children[0];
+      flashlight.intensity = flashlightIntensity;
+      flashlight.angle = Math.min(flashlightAngle, Math.PI/2);
+      flashlight.distance = flashlightDistance;
+      
+      // Update red tint (increased intensity)
+      const redOverlay = document.getElementById('redOverlay');
+      redOverlay.style.background = `rgba(255,0,0,${collectiblesFound * 0.08})`; // Increased from 0.05
+      
+      // Add red tint to all textures
+      trees.forEach(tree => {
+        const trunk = tree.mesh.children[0];
+        const top = tree.mesh.children[1];
+        
+        // Add red tint to trunk
+        if(!trunk.material.originalColor) {
+          trunk.material.originalColor = trunk.material.color.clone();
+        }
+        trunk.material.color.lerp(new THREE.Color(1,0,0), collectiblesFound * 0.1);
+        
+        // Add red tint to top
+        if(!top.material.originalColor) {
+          top.material.originalColor = top.material.color.clone();
+        }
+        top.material.color.lerp(new THREE.Color(1,0,0), collectiblesFound * 0.1);
+      });
+      
+      $("#collectibles").text(`Gangster Videos Found: ${collectiblesFound}/${TOTAL_COLLECTIBLES}`);
+      
+      footstepSound.rate(Math.pow(1.2, collectiblesFound)); // Adjust footstep sound speed
+
+      if(collectiblesFound >= TOTAL_COLLECTIBLES) {
+        $("#winScreen").css('display', 'flex').hide().fadeIn(1000);
+        setTimeout(() => {
+          location.reload();
+        }, 5000);
+      }
+    }
+    
+    if(videoGroup.visible) {
+      const distance = player.position.distanceTo(videoGroup.position);
+      videoSound.pos(videoGroup.position.x, videoGroup.position.y, videoGroup.position.z, videoSound.id);
+      videoSound.volume(Math.max(0, 1 - distance/20));
+    }
+  });
+  
+  renderer.render(scene, camera);
+}
+
+init();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+renderer.domElement.addEventListener('click', () => {
+  renderer.domElement.requestPointerLock();
+});
+</script>
+
+</body></html>
