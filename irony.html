@@ -1,0 +1,381 @@
+<html><head><base href="https://www.google.com"></base><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domo Palubinsko ironija</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #1a1a1a;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 3em;
+    text-shadow: 2px 2px #ff00ff;
+    margin-bottom: 30px;
+}
+
+.upload-section {
+    background: #2a2a2a;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.file-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 20px 0;
+    padding: 10px;
+    background: #333;
+    border-radius: 5px;
+}
+
+button {
+    background: #ff00ff;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px;
+    transition: transform 0.2s;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+#videoContainer {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 20px auto;
+    background: #000;
+    display: none;
+}
+
+.media-element {
+    position: absolute;
+    transition: all 0.5s;
+}
+
+#downloadSection {
+    display: none;
+    margin-top: 20px;
+}
+
+#recordingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+</style>
+</head>
+<body>
+    <h1>Domo Palubinsko ironija</h1>
+    
+    <div class="upload-section">
+        <h2>Upload Your Files</h2>
+        <input type="file" id="fileInput" multiple accept="image/*,video/*,audio/*">
+        <div class="file-list" id="fileList"></div>
+    </div>
+
+    <button id="generateBtn">JUOKINGAS VIDEO</button>
+    <div id="videoContainer">
+        <canvas id="recordingCanvas"></canvas>
+    </div>
+    <div id="downloadSection">
+        <button id="downloadBtn">Download Video</button>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/RecordRTC/5.6.2/RecordRTC.min.js"></script>
+<script>
+const uploadedFiles = {
+    images: [],
+    videos: [],
+    audio: []
+};
+
+let activeAudioElements = [];
+const MAX_AUDIO = 2;
+const MAX_MEDIA_ELEMENTS = Math.floor(Math.random() * 6) + 2; // Random between 2-7 elements max
+let elements = []; // Declare elements array globally
+
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach(file => {
+        const fileType = file.type.split('/')[0];
+        const fileURL = URL.createObjectURL(file);
+        
+        if (fileType === 'image') uploadedFiles.images.push(fileURL);
+        else if (fileType === 'video') uploadedFiles.videos.push(fileURL);
+        else if (fileType === 'audio') uploadedFiles.audio.push(fileURL);
+        
+        displayFileInList(file.name);
+    });
+});
+
+function displayFileInList(fileName) {
+    const fileList = document.getElementById('fileList');
+    const fileElement = document.createElement('div');
+    fileElement.textContent = fileName;
+    fileList.appendChild(fileElement);
+}
+
+let recorder;
+const videoContainer = document.getElementById('videoContainer');
+const canvas = document.getElementById('recordingCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = 800;
+canvas.height = 600;
+
+document.getElementById('generateBtn').addEventListener('click', async () => {
+    videoContainer.style.display = 'block';
+    
+    const stream = canvas.captureStream(30);
+    recorder = new RecordRTC(stream, {
+        type: 'video',
+        mimeType: 'video/webm'
+    });
+    recorder.startRecording();
+
+    generateChaosVideo();
+
+    setTimeout(() => {
+        recorder.stopRecording(() => {
+            const blob = recorder.getBlob();
+            document.getElementById('downloadSection').style.display = 'block';
+            document.getElementById('downloadBtn').onclick = () => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'chaos_video.webm';
+                a.click();
+            };
+        });
+    }, 60000);
+});
+
+function playAudio() {
+    if (uploadedFiles.audio.length && activeAudioElements.length < MAX_AUDIO) {
+        const audio = new Audio(uploadedFiles.audio[Math.floor(Math.random() * uploadedFiles.audio.length)]);
+        audio.volume = Math.random() * 0.7 + 0.1;
+        audio.playbackRate = Math.random() * 2.75 + 0.25;
+        
+        activeAudioElements.push(audio);
+        
+        audio.onended = () => {
+            const index = activeAudioElements.indexOf(audio);
+            if (index > -1) activeAudioElements.splice(index, 1);
+        };
+        
+        audio.play();
+    }
+}
+
+const addRandomElement = () => {
+    if (elements.length >= MAX_MEDIA_ELEMENTS) return;
+    
+    // Much more random chance to add elements - only 40% chance now
+    if (Math.random() > 0.4) return;
+    
+    const elementTypes = ['image', 'video'];
+    const type = elementTypes[Math.floor(Math.random() * elementTypes.length)];
+    
+    let element;
+    if (type === 'image' && uploadedFiles.images.length) {
+        element = new Image();
+        element.src = uploadedFiles.images[Math.floor(Math.random() * uploadedFiles.images.length)];
+    } else if (type === 'video' && uploadedFiles.videos.length) {
+        element = document.createElement('video');
+        element.src = uploadedFiles.videos[Math.floor(Math.random() * uploadedFiles.videos.length)];
+        element.autoplay = true;
+        element.muted = true;
+        element.loop = true;
+        element.play().catch(e => console.log('Video play error:', e));
+    }
+
+    if (element) {
+        const entrances = ['left', 'right', 'top', 'bottom', 'center', 'random'];
+        const entrance = entrances[Math.floor(Math.random() * entrances.length)];
+        
+        let startX, startY;
+        switch(entrance) {
+            case 'left': 
+                startX = -300;
+                startY = Math.random() * canvas.height;
+                break;
+            case 'right':
+                startX = canvas.width + 300;
+                startY = Math.random() * canvas.height;
+                break;
+            case 'top':
+                startX = Math.random() * canvas.width;
+                startY = -300;
+                break;
+            case 'bottom':
+                startX = Math.random() * canvas.width;
+                startY = canvas.height + 300;
+                break;
+            case 'center':
+                startX = canvas.width / 2;
+                startY = canvas.height / 2;
+                break;
+            case 'random':
+                startX = Math.random() * (canvas.width + 600) - 300;
+                startY = Math.random() * (canvas.height + 600) - 300;
+                break;
+        }
+
+        const minSize = Math.random() * 100 + 50;
+        const maxSize = Math.random() * 400 + 200;
+        
+        const elementData = {
+            element: element,
+            width: Math.random() * (maxSize - minSize) + minSize,
+            x: startX,
+            y: startY,
+            targetX: Math.random() * (canvas.width - 200),
+            targetY: Math.random() * (canvas.height - 200),
+            rotation: Math.random() < 0.3 ? Math.random() * 360 : 0,
+            rotationSpeed: Math.random() < 0.3 ? (Math.random() - 0.5) * 8 : 0,
+            opacity: 0,
+            transitionState: 'fadingIn',
+            scale: Math.random() * 0.8 + 0.4,
+            scaleDirection: Math.random() < 0.5 ? 1 : -1,
+            moveSpeed: Math.random() * 5 + 1,
+            movePattern: Math.random() < 0.3 ? 'sine' : 
+                        Math.random() < 0.5 ? 'circular' : 'linear',
+            moveTime: 0
+        };
+        
+        elements.push(elementData);
+
+        setTimeout(() => {
+            elementData.transitionState = 'fadingOut';
+        }, Math.random() * 13000 + 2000);
+    }
+};
+
+function generateChaosVideo() {
+    let backgroundElement = null;
+
+    function createBackgroundElement() {
+        const type = Math.random() > 0.5 && uploadedFiles.videos.length ? 'video' : 'image';
+        let element;
+        
+        if (type === 'image' && uploadedFiles.images.length) {
+            element = new Image();
+            element.src = uploadedFiles.images[Math.floor(Math.random() * uploadedFiles.images.length)];
+        } else if (type === 'video' && uploadedFiles.videos.length) {
+            element = document.createElement('video');
+            element.src = uploadedFiles.videos[Math.floor(Math.random() * uploadedFiles.videos.length)];
+            element.autoplay = true;
+            element.muted = true;
+            element.loop = true;
+            element.play().catch(e => console.log('Video play error:', e));
+        }
+
+        return {
+            element: element,
+            opacity: 1,
+            transitionState: 'fadingIn',
+            scale: 1,
+            rotation: 0
+        };
+    }
+
+    backgroundElement = createBackgroundElement();
+    setInterval(playAudio, Math.random() * 6000 + 2000);
+    setInterval(addRandomElement, Math.random() * 8000 + 1000); // More variation in timing
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (backgroundElement) {
+            if (backgroundElement.transitionState === 'fadingIn') {
+                backgroundElement.opacity = Math.min(1, backgroundElement.opacity + 0.02);
+                if (backgroundElement.opacity >= 1) backgroundElement.transitionState = 'stable';
+            } else if (backgroundElement.transitionState === 'fadingOut') {
+                backgroundElement.opacity = Math.max(0, backgroundElement.opacity - 0.02);
+                if (backgroundElement.opacity <= 0) backgroundElement = createBackgroundElement();
+            }
+            
+            backgroundElement.rotation += Math.random() < 0.1 ? Math.sin(Date.now() / 1000) * 0.2 : 0; // Only 10% chance to rotate
+            backgroundElement.scale = 1 + Math.sin(Date.now() / 2000) * 0.05; // Reduced scale variation
+            
+            ctx.save();
+            ctx.globalAlpha = backgroundElement.opacity;
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.rotate(backgroundElement.rotation * Math.PI / 180);
+            ctx.scale(backgroundElement.scale, backgroundElement.scale);
+            ctx.drawImage(backgroundElement.element, -canvas.width/2, -canvas.height/2, canvas.width, canvas.height);
+            ctx.restore();
+        }
+
+        elements.forEach((elementData, index) => {
+            if (elementData.transitionState === 'fadingIn') {
+                elementData.opacity = Math.min(0.8, elementData.opacity + 0.02);
+                
+                switch(elementData.movePattern) {
+                    case 'sine':
+                        elementData.moveTime += 0.02;
+                        const amplitude = 50;
+                        elementData.x += Math.sin(elementData.moveTime) * amplitude * 0.1;
+                        break;
+                    case 'circular':
+                        elementData.moveTime += 0.02;
+                        const radius = 30;
+                        elementData.x += Math.cos(elementData.moveTime) * radius * 0.1;
+                        elementData.y += Math.sin(elementData.moveTime) * radius * 0.1;
+                        break;
+                    default: // linear
+                        const dx = elementData.targetX - elementData.x;
+                        const dy = elementData.targetY - elementData.y;
+                        elementData.x += dx * 0.05 * elementData.moveSpeed;
+                        elementData.y += dy * 0.05 * elementData.moveSpeed;
+                }
+                
+                elementData.scale += 0.01 * elementData.scaleDirection;
+                if (elementData.scale > 1.5 || elementData.scale < 0.5) {
+                    elementData.scaleDirection *= -1;
+                }
+            } else if (elementData.transitionState === 'fadingOut') {
+                elementData.opacity = Math.max(0, elementData.opacity - 0.02);
+                if (elementData.opacity <= 0) {
+                    elements.splice(index, 1);
+                    return;
+                }
+            }
+
+            ctx.save();
+            ctx.globalAlpha = elementData.opacity;
+            ctx.translate(elementData.x + elementData.width/2, elementData.y + elementData.width/2);
+            ctx.rotate(elementData.rotation * Math.PI / 180);
+            ctx.scale(elementData.scale, elementData.scale);
+            ctx.drawImage(elementData.element, -elementData.width/2, -elementData.width/2, elementData.width, elementData.width);
+            ctx.restore();
+
+            elementData.rotation += elementData.rotationSpeed;
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+    
+    setInterval(() => {
+        if (backgroundElement.transitionState === 'stable') {
+            backgroundElement.transitionState = 'fadingOut';
+        }
+    }, Math.random() * 5000 + 5000);
+}
+</script>
+</body>
+</html>

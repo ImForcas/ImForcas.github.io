@@ -182,6 +182,20 @@ h1 {
   animation: creepy 3s ease-in-out infinite;
 }
 
+.ironija-btn {
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  color: white;
+  border: 3px solid #ff6b6b;
+  text-shadow: 0 0 5px #4ecdc4;
+  animation: colorShift 4s linear infinite;
+}
+
+@keyframes colorShift {
+  0% { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
+  50% { background: linear-gradient(45deg, #4ecdc4, #ff6b6b); }
+  100% { background: linear-gradient(45deg, #ff6b6b, #4ecdc4); }
+}
+
 @keyframes creepy {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.02) skew(2deg); }
@@ -197,9 +211,10 @@ h1 {
   <h1>Domo Palubinsko puslapis</h1>
   
   <div class="button-container">
-    <a href="./Wordle.html" class="button wordle-btn">Wordle</a>
+    <a href="./wordle.html" class="button wordle-btn">Wordle</a>
     <a href="./matematika.html" class="button matematika-btn">Matematika</a>
     <a href="./miskas.html" class="button miskas-btn">Miškas</a>
+    <a href="./irony.html" class="button ironija-btn">Ironija</a>
   </div>
 </div>
 </body></html>
