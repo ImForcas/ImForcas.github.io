@@ -2,87 +2,251 @@
 <head>
     <meta charset="UTF-8">
     <title>Domo Palubinsko Puslapiai</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-primary: #0a0a1a;
+            --text-primary: #00ffff;
+            --accent-cyan: #00ffff;
+            --accent-purple: #ff00ff;
+            --accent-green: #00ff00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
+            overflow-x: hidden;
+            perspective: 1000px;
         }
+
+        /* Animated Background */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(0deg, rgba(0,255,255,0.03) 0, rgba(0,255,255,0.03) 1px, transparent 1px, transparent 2px),
+                repeating-linear-gradient(90deg, rgba(0,255,255,0.03) 0, rgba(0,255,255,0.03) 1px, transparent 1px, transparent 2px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+            z-index: -1;
+            animation: gridMove 10s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
+        }
+
+        /* Glitch Title Effect */
         h1 {
-            color: #333;
-            margin-bottom: 40px;
+            position: relative;
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 4rem 0;
+            text-shadow: 
+                0 0 10px var(--accent-cyan),
+                2px 2px var(--accent-purple);
+            animation: glitch 2s infinite;
         }
+
+        @keyframes glitch {
+            2%, 64% { transform: translate(2px, 0) skew(0deg); }
+            4%, 60% { transform: translate(-2px, 0) skew(0deg); }
+            62% { transform: translate(0, 0) skew(5deg); }
+        }
+
         .button-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            max-width: 600px;
+            max-width: 800px;
             width: 100%;
+            perspective: 1000px;
+            position: relative;
         }
+
         .site-button {
-            padding: 20px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
+            font-family: 'Roboto Mono', monospace;
+            padding: 25px;
+            font-size: 1.2rem;
+            border: 2px solid var(--accent-cyan);
+            background-color: rgba(0,0,0,0.7);
+            color: var(--text-primary);
             cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+            width: 100%; 
+            height: 120px; 
+        }
+
+        .site-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(0,255,255,0.2), transparent);
+            transition: all 0.6s;
+        }
+
+        .site-button:hover::before {
+            left: 100%;
+        }
+
+        .site-button:hover {
+            transform: scale(1.05) rotateX(10deg) rotateY(10deg);
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        .site-button::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: -2px;
+            width: calc(100% + 4px);
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-purple), var(--accent-cyan));
+            transform: scaleX(0);
+            transform-origin: right;
             transition: transform 0.3s ease;
         }
-        .site-button:hover {
-            transform: scale(1.05);
+
+        .site-button:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
         }
-        .regitra {
-            background-color: #4CAF50;
-            color: white;
+
+        .regitra { border-color: #4CAF50; }
+        .nx { border-color: #FF5722; }
+        .matematika { border-color: #2196F3; }
+        .wordle { border-color: #9C27B0; }
+        .irony { border-color: #FFC107; }
+        .miskas { border-color: #795548; }
+
+        .site-button-wrapper {
+            position: relative;
+            width: 100%;
+            height: 120px;
         }
-        .nx {
-            background-color: #FF5722;
-            color: white;
+
+        .flame {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            bottom: 100%; 
+            left: -10%; 
+            width: 120%; 
+            height: 150px; 
+            background-size: contain;
+            background-position: bottom center;
+            background-repeat: no-repeat;
+            z-index: 1;
+            transform: translateY(20%); 
         }
-        .matematika {
-            background-color: #2196F3;
-            color: white;
-        }
-        .wordle {
-            background-color: #9C27B0;
-            color: white;
-        }
-        .irony {
-            background-color: #FFC107;
-            color: black;
-        }
-        .miskas {
-            background-color: #795548;
-            color: white;
+
+        .site-button-wrapper:hover .flame {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
     <h1>Domo Palubinsko Puslapiai</h1>
     <div class="button-container">
-        <a href="regit.html" style="text-decoration: none;">
-            <button class="site-button regitra">Regitra</button>
-        </a>
-        <a href="nx.html" style="text-decoration: none;">
-            <button class="site-button nx">NX</button>
-        </a>
-        <a href="matematika.html" style="text-decoration: none;">
-            <button class="site-button matematika">Matematika</button>
-        </a>
-        <a href="Wordle.html" style="text-decoration: none;">
-            <button class="site-button wordle">Wordle</button>
-        </a>
-        <a href="irony.html" style="text-decoration: none;">
-            <button class="site-button irony">Irony</button>
-        </a>
-        <a href="miskas.html" style="text-decoration: none;">
-            <button class="site-button miskas">Miškas</button>
-        </a>
+        <div class="site-button-wrapper">
+            <a href="regit.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button regitra">
+                    Regitra
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
+        
+        <div class="site-button-wrapper">
+            <a href="nx.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button nx">
+                    NX
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
+
+        <div class="site-button-wrapper">
+            <a href="matematika.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button matematika">
+                    Matematika
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
+
+        <div class="site-button-wrapper">
+            <a href="Wordle.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button wordle">
+                    Wordle
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
+
+        <div class="site-button-wrapper">
+            <a href="irony.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button irony">
+                    Irony
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
+
+        <div class="site-button-wrapper">
+            <a href="miskas.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button miskas">
+                    Miškas
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
     </div>
+
+    <script>
+        function createCyberEffect() {
+            const body = document.body;
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.width = '2px';
+                particle.style.height = '2px';
+                particle.style.backgroundColor = Math.random() > 0.5 ? 'rgba(0,255,255,0.3)' : 'rgba(255,0,255,0.3)';
+                particle.style.borderRadius = '50%';
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animation = `float ${5 + Math.random() * 5}s infinite alternate`;
+                body.appendChild(particle);
+            }
+        }
+
+        createCyberEffect();
+    </script>
 </body>
 </html>
