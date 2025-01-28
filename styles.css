@@ -1,0 +1,85 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: black;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+#kill-counter {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  z-index: 100;
+}
+
+.nx-image {
+  position: absolute;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.nx-image:hover {
+  transform: scale(1.1);
+}
+
+.explosion {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#video-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+#video-overlay.visible {
+  opacity: 1;
+}
+
+#video-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#play-button {
+  position: absolute;
+  font-size: 100px;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+#play-button.visible {
+  opacity: 1;
+}
+
+#mister-robot-video {
+  max-width: 90%;
+  max-height: 90%;
+  display: none;
+}
+
+#video-overlay.playing #play-button {
+  display: none;
+}
+
+#video-overlay.playing #mister-robot-video {
+  display: block;
+}
