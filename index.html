@@ -143,6 +143,7 @@
         .wordle { border-color: #9C27B0; }
         .irony { border-color: #FFC107; }
         .miskas { border-color: #795548; }
+        .vytas { border-color: #673AB7; }
 
         .site-button-wrapper {
             position: relative;
@@ -168,6 +169,50 @@
 
         .site-button-wrapper:hover .flame {
             opacity: 1;
+        }
+
+        .section-divider {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(to right, var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 20px;
+            z-index: 1;
+        }
+
+        .cyber-line {
+            flex-grow: 1;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-cyan), var(--accent-purple), transparent);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(0,255,255,0.5), transparent);
+            animation: lineMove 3s linear infinite;
+        }
+
+        @keyframes lineMove {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
     </style>
 </head>
@@ -227,6 +272,20 @@
             </a>
             <div class="flame" style="background-image: url('/fire.gif');"></div>
         </div>
+
+        <div class="section-divider">
+            <h2 class="section-title">Kitų žmonių žaidimai</h2>
+            <div class="cyber-line"></div>
+        </div>
+
+        <div class="site-button-wrapper">
+            <a href="Vytas.html" style="text-decoration: none; width: 100%;">
+                <button class="site-button vytas">
+                    Vyto Sigma žaidimas
+                </button>
+            </a>
+            <div class="flame" style="background-image: url('/fire.gif');"></div>
+        </div>
     </div>
 
     <script>
@@ -247,6 +306,25 @@
         }
 
         createCyberEffect();
+
+        function createCyberGlitchEffect() {
+            const body = document.body;
+            for (let i = 0; i < 30; i++) {
+                const glitch = document.createElement('div');
+                glitch.style.position = 'fixed';
+                glitch.style.width = `${Math.random() * 50}px`;
+                glitch.style.height = `${Math.random() * 5}px`;
+                glitch.style.backgroundColor = Math.random() > 0.5 ? 'rgba(0,255,255,0.2)' : 'rgba(255,0,255,0.2)';
+                glitch.style.top = `${Math.random() * 100}%`;
+                glitch.style.left = `${Math.random() * 100}%`;
+                glitch.style.opacity = Math.random() * 0.5;
+                glitch.style.transform = `rotate(${Math.random() * 360}deg)`;
+                glitch.style.animation = `glitchMove ${5 + Math.random() * 5}s infinite alternate`;
+                body.appendChild(glitch);
+            }
+        }
+
+        createCyberGlitchEffect();
     </script>
 </body>
 </html>

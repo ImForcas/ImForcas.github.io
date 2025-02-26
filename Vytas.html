@@ -1,0 +1,79 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cosmic Survivor - Sigma Edition</title>
+  <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+  <div id="experience-bar-container">
+    <div id="experience-bar">
+      <div id="experience-bar-fill"></div>
+      <div id="experience-bar-text">Lvl 1 | 0/100 XP</div>
+    </div>
+  </div>
+  <div id="timer-overlay">⏱️ 00:00</div>
+  <div id="debug-button" class="hidden">🐞 Debug</div>
+  <div id="debug-modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Debug Controls</h2>
+      <div class="debug-controls">
+        <label for="stage-input">Set Stage:</label>
+        <input type="number" id="stage-input" min="1" value="1">
+        <button id="set-stage-btn">Set Stage</button>
+      </div>
+      <div class="debug-controls">
+        <label for="health-input">Set Health:</label>
+        <input type="number" id="health-input" min="1" max="10" value="3">
+        <button id="set-health-btn">Set Health</button>
+      </div>
+      <div class="debug-controls">
+        <label for="experience-input">Set Experience:</label>
+        <input type="number" id="experience-input" min="0" value="0">
+        <button id="set-experience-btn">Set Experience</button>
+      </div>
+      <div class="debug-controls">
+        <label for="sigma-speed-input">Sigma Speed:</label>
+        <input type="number" id="sigma-speed-input" min="0.1" max="10" step="0.1" value="1">
+        <button id="set-sigma-speed-btn">Set Speed</button>
+      </div>
+      <div class="debug-controls">
+        <label for="sigma-damage-input">Sigma Damage:</label>
+        <input type="number" id="sigma-damage-input" min="0.1" max="10" step="0.1" value="1">
+        <button id="set-sigma-damage-btn">Set Damage</button>
+      </div>
+      <div class="debug-controls">
+        <label for="jonkbullet-damage-input">JonkBullet Damage:</label>
+        <input type="number" id="jonkbullet-damage-input" min="0.1" max="10" step="0.1" value="1">
+        <button id="set-jonkbullet-damage-btn">Set Damage</button>
+      </div>
+    </div>
+  </div>
+  <div class="game-container">
+    <canvas id="backgroundCanvas"></canvas>
+    <canvas id="gameCanvas"></canvas>
+    <div id="game-ui">
+      <div class="stats">
+        <div id="health-container">
+          <!-- Hearts will be dynamically added here -->
+        </div>
+        <span id="kills"> 0</span>
+        <span id="score"> 0</span>
+      </div>
+      <div id="game-over" class="hidden">
+        <h2>Game Over</h2>
+        <p>Total Kills: <span id="final-kills">0</span></p>
+        <p>Final Score: <span id="final-score">0</span></p>
+        <p>Total Time: <span id="final-time">00:00</span></p>
+        <button id="restart-btn">Restart</button>
+      </div>
+    </div>
+    <div id="loading-overlay">Loading...</div>
+    <div id="bullet-container"></div>
+    <div id="score-overlay"> 0</div>
+    <div id="stage-overlay"> Stage 1</div>
+  </div>
+  <script src="app.js" type="module"></script>
+</body>
+</html>
